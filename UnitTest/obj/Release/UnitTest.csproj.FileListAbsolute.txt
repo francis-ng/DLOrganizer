@@ -1,0 +1,14 @@
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\bin\Release\UnitTest.dll
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\bin\Release\UnitTest.pdb
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\bin\Release\DLOrganizer.exe
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\bin\Release\DLOrganizer.pdb
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\obj\Release\UnitTest.csprojResolveAssemblyReference.cache
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\obj\Release\UnitTest.dll
+D:\Data\Documents\Visual Studio 2012\Projects\AnimeOrganizer\UnitTest\obj\Release\UnitTest.pdb
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\bin\Release\UnitTest.dll
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\bin\Release\UnitTest.pdb
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\bin\Release\DLOrganizer.exe
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\bin\Release\DLOrganizer.pdb
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\obj\Release\UnitTest.csprojResolveAssemblyReference.cache
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\obj\Release\UnitTest.dll
+D:\Data\Documents\Visual Studio 2012\Projects\DLOrganizer\UnitTest\obj\Release\UnitTest.pdb
