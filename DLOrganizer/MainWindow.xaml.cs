@@ -122,9 +122,7 @@ namespace DLOrganizer
             {
                 Config config = new Config(name, ext, dest);
                 configs.Add(config);
-                txt_configName.Text = "";
-                txt_configExt.Text = "";
-                txt_configDest.Text = "";
+                clearConfigText();
                 txt_configName.Focus();
             }
             else
@@ -135,9 +133,8 @@ namespace DLOrganizer
                 config.Ext = ext;
                 config.Destination = dest;
                 lstb_configs.Items.Refresh();
-                txt_configName.Text = "";
-                txt_configExt.Text = "";
-                txt_configDest.Text = "";
+                lstb_configs.UnselectAll();
+                clearConfigText();
                 txt_configName.Focus();
             }
         }
@@ -156,9 +153,7 @@ namespace DLOrganizer
         private void btn_newconfig_Click(object sender, RoutedEventArgs e)
         {
             lstb_configs.UnselectAll();
-            txt_configName.Text = "";
-            txt_configExt.Text = "";
-            txt_configDest.Text = "";
+            clearConfigText();
             txt_configName.Focus();
         }
 
@@ -172,9 +167,7 @@ namespace DLOrganizer
             int index = lstb_configs.SelectedIndex;
             if (index == -1)
             {
-                txt_configName.Text = "";
-                txt_configExt.Text = "";
-                txt_configDest.Text = "";
+                clearConfigText();
                 btn_addupdate.Content = "Add";
                 btn_browsedelete.Content = "Browse";
             }
@@ -224,6 +217,13 @@ namespace DLOrganizer
                         break;
                 }
             }
+        }
+
+        private void clearConfigText()
+        {
+            txt_configName.Text = "";
+            txt_configExt.Text = "";
+            txt_configDest.Text = "";
         }
     }
 }
