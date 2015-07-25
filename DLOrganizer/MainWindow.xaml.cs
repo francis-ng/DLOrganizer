@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using MahApps.Metro.Controls;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -26,7 +27,7 @@ namespace DLOrganizer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         private const string VERSION = "v1.0.2";
         private const string configFile = "config.xml";
