@@ -66,6 +66,7 @@
     <Compile Include="Model\Config.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\FolderSelectDialog.cs" />
+    <Compile Include="Utils\LogEventArgs.cs" />
     <Compile Include="Utils\MappingProvider.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using DLOrganizer.Properties;
 using DLOrganizer.Utils;
 using DLOrganizer.Model;
@@ -27,14 +28,18 @@ namespace DLOrganizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string VERSION = "v1.0.2";
         private const string configFile = "config.xml";
         private ObservableCollection<Config> configs;
+
+        delegate void textUpdater(string text);
 
         public MainWindow()
         {
             InitializeComponent();
             Closing += OnWindowClosing;
             txt_srcFolder.Text = Settings.Default.DefaultSource;
+            lbl_versionInfo.Content = lbl_versionInfo.Content.ToString() + VERSION;
             try
             {
                 configs = new ObservableCollection<Config>(new ConfigReader(configFile).getConfigs());
@@ -80,12 +85,14 @@ namespace DLOrganizer
 
         private void btn_process_Click(object sender, RoutedEventArgs e)
         {
+            bool shouldSimulate = (bool)chkbx_simulate.IsChecked;
+            int selected = cmb_sanitize.SelectedIndex;
             try
             {
                 FileProcessor fp = new FileProcessor(configs, txt_srcFolder.Text);
-                fp.processFiles((bool)chkbx_simulate.IsChecked, cmb_sanitize.SelectedIndex);
-                updateText(fp.getLogs());
-                //updateText("Errors:\n" + MappingProvider.GetMappingErrors());
+                fp.LogChanged += new EventHandler<LogEventArgs>(logUpdated);
+                Thread oThread = new Thread(() => fp.processFiles(shouldSimulate, selected));
+                oThread.Start();
             }
             catch (Exception ex)
             {
@@ -141,13 +148,20 @@ namespace DLOrganizer
 
         private void updateText(string line)
         {
-            txt_log.Text += line;
-            if (txt_log.LineCount > 50)
+            if (txt_log.Dispatcher.CheckAccess())
             {
-                int length = txt_log.GetLineLength(0);
-                txt_log.Text = txt_log.Text.Substring(length, txt_log.Text.Length - length);
+                txt_log.Text += line;
+                if (txt_log.LineCount > 50)
+                {
+                    int length = txt_log.GetLineLength(0);
+                    txt_log.Text = txt_log.Text.Substring(length, txt_log.Text.Length - length);
+                }
+                txt_log.ScrollToEnd();
             }
-            txt_log.ScrollToEnd();
+            else
+            {
+                txt_log.Dispatcher.BeginInvoke(new textUpdater(updateText), new string[] { line });
+            }
         }
 
         private void btn_newconfig_Click(object sender, RoutedEventArgs e)
@@ -224,6 +238,12 @@ namespace DLOrganizer
             txt_configName.Text = "";
             txt_configExt.Text = "";
             txt_configDest.Text = "";
+        }
+
+        private void logUpdated(object sender, LogEventArgs e)
+        {
+            TextBox logBox = txt_log;
+            updateText(e.LogMessage + "\n");
         }
     }
 }

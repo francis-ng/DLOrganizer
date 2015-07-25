@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
-using DLOrganizer.Utils;
-using System.Collections.ObjectModel;
 using DLOrganizer.Model;
+using DLOrganizer.Utils;
 
 namespace DLOrganizer
 {
@@ -18,12 +18,22 @@ namespace DLOrganizer
         private ObservableCollection<Config> _configs;
         private static List<string> _logs;
 
+        public event EventHandler<LogEventArgs> LogChanged;
+
         public FileProcessor(ObservableCollection<Config> configs, string srcDir)
         {
             _configs = configs;
             _activeDir = srcDir;
             _fileList = new List<string>();
             _logs = new List<string>();
+        }
+
+        protected virtual void LogAdded(LogEventArgs e)
+        {
+            if (LogChanged != null)
+            {
+                LogChanged(this, e);
+            }
         }
 
         public void processFiles(bool simulate, int sanitize)
@@ -55,15 +65,17 @@ namespace DLOrganizer
         {
             if (dest != null)
             {
+                LogEventArgs args = new LogEventArgs();
                 if (!Directory.Exists(dest))
                 {
                     if (!simulate) Directory.CreateDirectory(dest);
-                    _logs.Add("Created directory " + dest);
+                    args.LogMessage = "Created directory " + dest;
+                    LogAdded(args);
                 }
                 dest = Path.Combine(dest, Path.GetFileName(file));
                 if (!simulate) FileSystem.MoveFile(file, dest, UIOption.AllDialogs);
-                string log = "Moved " + file + " to " + dest + ".";
-                _logs.Add(log);
+                args.LogMessage = "Moved " + file + " to " + dest + ".";
+                LogAdded(args);
             }
         }
 
@@ -93,22 +105,11 @@ namespace DLOrganizer
                     if (!simulate) FileSystem.RenameFile(_fileList[i], newName);
                     _fileList[i] = Path.GetDirectoryName(_fileList[i]) + @"\" + newName;
                     log += newName + ".";
-                    _logs.Add(log);
+                    LogEventArgs args = new LogEventArgs();
+                    args.LogMessage = log;
+                    LogAdded(args);
                 }
             }
-        }
-
-        public string getLogs()
-        {
-            string output = "";
-            if (_logs.Count > 0)
-            {
-                foreach (string log in _logs)
-                {
-                    output += log + "\n";
-                }
-            }
-            return output;
         }
     }
 }

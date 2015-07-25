@@ -112,7 +112,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Image HorizontalAlignment="Left" Width="50" Height="50" Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" Source="Resources/image.jpg"/>
-                <Label Content="DL Organizer v1.0" VerticalAlignment="Center"  Grid.Row="1" Grid.Column="2" FontWeight="Bold" FontSize="20" />
+                <Label Name="lbl_versionInfo" Content="DL Organizer " VerticalAlignment="Center"  Grid.Row="1" Grid.Column="2" FontWeight="Bold" FontSize="20" />
                 <Label Content="© Francis Ng" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="16" />
             </Grid>
         </TabItem>
