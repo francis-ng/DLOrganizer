@@ -29,7 +29,7 @@ namespace DLOrganizer
     /// </summary>
     public partial class MainWindow
     {
-        private const string VERSION = "v1.0.2";
+        private const string VERSION = "v1.0.3";
         private const string configFile = "config.xml";
         private ObservableCollection<Config> configs;
 
@@ -116,8 +116,17 @@ namespace DLOrganizer
             }
             else
             {
+                int curIndex = lstb_configs.SelectedIndex;
                 configs.RemoveAt(lstb_configs.SelectedIndex);
                 lstb_configs.Items.Refresh();
+                if (lstb_configs.Items.Count == curIndex)
+                {
+                    lstb_configs.SelectedIndex = curIndex - 1;
+                }
+                else if (lstb_configs.HasItems)
+                {
+                    lstb_configs.SelectedIndex = curIndex;
+                }
             }
         }
 
