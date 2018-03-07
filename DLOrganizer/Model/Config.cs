@@ -8,34 +8,30 @@ namespace DLOrganizer.Model
 {
     public class Config
     {
-        private string _name;
-        private string _ext;
-        private string _dest;
-
         public Config() { }
 
         public Config(string name, string ext, string dest)
         {
-            _name = name;
-            _ext = ext;
-            _dest = dest;
+            Name = name;
+            Ext = ext;
+            Destination = dest;
         }
 
         public string Name
         {
-            get { return _name; }
-            set { _name = value; }
+            get;
+            set;
         }
 
         public string Ext
         {
-            get { return _ext; }
-            set { _ext = value; }
+            get;
+            set;
         }
 
         public string Destination {
-            get { return _dest; }
-            set { _dest = value; }
+            get;
+            set;
         }
 
         public override string ToString()

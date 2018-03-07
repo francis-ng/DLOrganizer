@@ -29,7 +29,7 @@ namespace DLOrganizer
     /// </summary>
     public partial class MainWindow
     {
-        private const string VERSION = "v1.0.3";
+        private const string VERSION = "v1.0.4";
         private const string configFile = "config.xml";
         private ObservableCollection<Config> configs;
 
@@ -38,9 +38,23 @@ namespace DLOrganizer
         public MainWindow()
         {
             InitializeComponent();
+            Initialize();
+            LoadConfigs();
+        }
+
+        private void Initialize()
+        {
             Closing += OnWindowClosing;
             txt_srcFolder.Text = Settings.Default.DefaultSource;
+            txt_srcFolder.KeyUp += ProcessSubmit;
+            txt_configName.KeyUp += SubmitAddOrUpdate;
+            txt_configExt.KeyUp += SubmitAddOrUpdate;
+            txt_configDest.KeyUp += SubmitAddOrUpdate;
             lbl_versionInfo.Content = lbl_versionInfo.Content.ToString() + VERSION;
+        }
+
+        private void LoadConfigs()
+        {
             try
             {
                 configs = new ObservableCollection<Config>(new ConfigReader(configFile).getConfigs());
@@ -86,19 +100,7 @@ namespace DLOrganizer
 
         private void btn_process_Click(object sender, RoutedEventArgs e)
         {
-            bool shouldSimulate = (bool)chkbx_simulate.IsChecked;
-            int selected = cmb_sanitize.SelectedIndex;
-            try
-            {
-                FileProcessor fp = new FileProcessor(configs, txt_srcFolder.Text);
-                fp.LogChanged += new EventHandler<LogEventArgs>(logUpdated);
-                Thread oThread = new Thread(() => fp.processFiles(shouldSimulate, selected));
-                oThread.Start();
-            }
-            catch (Exception ex)
-            {
-                updateText(ex.Message);
-            }
+            Process();
         }
 
         private void btn_browsedelete_Click(object sender, RoutedEventArgs e)
@@ -132,28 +134,7 @@ namespace DLOrganizer
 
         private void btn_addupdate_Click(object sender, RoutedEventArgs e)
         {
-            string name = txt_configName.Text;
-            string ext = txt_configExt.Text;
-            string dest = txt_configDest.Text;
-            if (lstb_configs.SelectedIndex == -1)
-            {
-                Config config = new Config(name, ext, dest);
-                configs.Add(config);
-                clearConfigText();
-                txt_configName.Focus();
-            }
-            else
-            {
-                int index = lstb_configs.SelectedIndex;
-                Config config = configs[index];
-                config.Name = name;
-                config.Ext = ext;
-                config.Destination = dest;
-                lstb_configs.Items.Refresh();
-                lstb_configs.UnselectAll();
-                clearConfigText();
-                txt_configName.Focus();
-            }
+            AddOrUpdate();
         }
 
         private void updateText(string line)
@@ -215,6 +196,65 @@ namespace DLOrganizer
                 {
                     saveConfigs();
                 }
+            }
+        }
+
+        private void SubmitAddOrUpdate(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                AddOrUpdate();
+            }
+        }
+
+        private void ProcessSubmit(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Process();
+            }
+        }
+
+        private void AddOrUpdate()
+        {
+            string name = txt_configName.Text;
+            string ext = txt_configExt.Text;
+            string dest = txt_configDest.Text;
+            if (lstb_configs.SelectedIndex == -1)
+            {
+                Config config = new Config(name, ext, dest);
+                configs.Add(config);
+                clearConfigText();
+                txt_configName.Focus();
+            }
+            else
+            {
+                int index = lstb_configs.SelectedIndex;
+                Config config = configs[index];
+                config.Name = name;
+                config.Ext = ext;
+                config.Destination = dest;
+                lstb_configs.Items.Refresh();
+                lstb_configs.UnselectAll();
+                clearConfigText();
+                txt_configName.Focus();
+            }
+        }
+
+        private void Process()
+        {
+            bool shouldSimulate = (bool)chkbx_simulate.IsChecked;
+            int selected = cmb_sanitize.SelectedIndex;
+            try
+            {
+                FileProcessor fp = new FileProcessor(configs, txt_srcFolder.Text);
+                fp.LogChanged += new EventHandler<LogEventArgs>(logUpdated);
+                Thread oThread = new Thread(() => fp.processFiles(shouldSimulate, selected));
+                oThread.Start();
+            }
+            catch (Exception ex)
+            {
+                updateText(ex.Message);
             }
         }
 

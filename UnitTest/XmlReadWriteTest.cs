@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DLOrganizer;
 using DLOrganizer.Model;
 using DLOrganizer.ConfigProvider;
 
