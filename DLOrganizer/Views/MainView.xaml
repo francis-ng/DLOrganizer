@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="DLOrganizer.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DLOrganizer.Views"
+             xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="960">
+    <Grid fw:PointerTracker.Enabled="True" Margin="15,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Label Content="Scan Directory" Grid.Row="0" Grid.Column="0" FontWeight="Bold" />
+        <TextBox x:Name="txt_srcFolder" TextWrapping="Wrap" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" Style="{StaticResource TextBoxRevealStyle}"/>
+        <Button x:Name="btn_browse" Content="Browse" Click="btn_browse_Click" Grid.Row="1" Grid.Column="1" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
+        <Button x:Name="btn_process" Content="Process" Click="btn_process_Click" Grid.Row="1" Grid.Column="2" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
+        <ComboBox x:Name="cmb_sanitize" Grid.Row="2" Grid.Column="0" Margin="0,5,5,5">
+            <ComboBoxItem IsSelected="True">Don't standardize filenames</ComboBoxItem>
+            <ComboBoxItem>Change '_' to ' '</ComboBoxItem>
+            <ComboBoxItem>Change ' ' to '_'</ComboBoxItem>
+        </ComboBox>
+        <CheckBox x:Name="chkbx_simulate" Content="Simulate" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5" />
+        <Label Content="Log" Grid.Row="3" Grid.Column="0" FontWeight="Bold" Margin="0,10,0,0" />
+        <TextBox x:Name="txt_log" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBoxRevealStyle}"/>
+        <Button x:Name="btn_clearlog" Content="Clear Log" Click="btn_clearlog_Click" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,0" VerticalAlignment="Top" Style="{StaticResource ButtonRevealStyle}" />
+    </Grid>
+</UserControl>

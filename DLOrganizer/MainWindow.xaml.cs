@@ -2,23 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using MahApps.Metro.Controls;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using DLOrganizer.Properties;
 using DLOrganizer.Utils;
 using DLOrganizer.Model;
 using DLOrganizer.ConfigProvider;
+using DLOrganizer.ViewModels;
 using FolderSelect;
 using System.IO;
 
@@ -197,6 +189,7 @@ namespace DLOrganizer
                     saveConfigs();
                 }
             }
+            //DataContext = new MainViewModel();
         }
 
         private void SubmitAddOrUpdate(object sender, KeyEventArgs e)
