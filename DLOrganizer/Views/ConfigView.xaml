@@ -16,7 +16,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid fw:PointerTracker.Enabled="True" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+        <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -48,7 +48,7 @@
             </Grid.RowDefinitions>
             <ListBox Name="lstb_configs" Grid.Column="0" Grid.Row="0" HorizontalContentAlignment="Stretch" 
                              Margin="0,10,0,10" Grid.ColumnSpan="2" SelectionChanged="lstb_configs_SelectionChanged" 
-                             ItemsSource="{Binding}" Style="{StaticResource ListBoxRevealStyle}">
+                             ItemsSource="{Binding Path=Configs}" Style="{StaticResource ListBoxRevealStyle}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0,2">

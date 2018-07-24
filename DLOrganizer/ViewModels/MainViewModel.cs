@@ -11,8 +11,21 @@ namespace DLOrganizer.ViewModels
 {
     public partial class MainViewModel
     {
-        
+        public string SourceFolder
+        {
+            get; set;
+        }
 
-        
+        public string LogContents
+        {
+            get; set;
+        }
+
+        public bool Simulate
+        {
+            get; set;
+        }
+
+        // Sanitize
     }
 }

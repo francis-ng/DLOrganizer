@@ -8,7 +8,8 @@
         xmlns:viewmodels="clr-namespace:DLOrganizer.ViewModels"
         xmlns:views="clr-namespace:DLOrganizer.Views"
         Title="DL Organizer" Width="1024" Height="480" 
-        ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterScreen">
+        ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterScreen"
+        fw:PointerTracker.Enabled="True" >
     <Window.Resources>
         <DataTemplate x:Name="mainViewTemplate" DataType="{x:Type viewmodels:MainViewModel}">
             <views:MainView DataContext="{Binding}" />
@@ -19,18 +20,26 @@
         <DataTemplate x:Name="aboutViewTemplate" DataType="{x:Type viewmodels:AboutViewModel}">
             <views:AboutView DataContext="{Binding}" />
         </DataTemplate>
+        <local:MainWindow x:Key="windowobj" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="5*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ListBox>
-            
-        </ListBox>
+        <StackPanel Grid.Row="0" Grid.Column="0" Background="#777">
+            <ItemsControl Name="MenuItems">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding Label}" Command="{Binding Path=Command}" CommandParameter="{Binding PageNumber}" 
+                                Style="{StaticResource ButtonRevealStyle}" MinHeight="40"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
         <ContentControl Grid.Row="0" Grid.Column="1" Content="{Binding}" />
     </Grid>
 </fw:AcrylicWindow>

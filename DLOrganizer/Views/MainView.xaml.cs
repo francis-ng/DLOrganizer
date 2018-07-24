@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace DLOrganizer.Views
 {
@@ -44,16 +45,29 @@ namespace DLOrganizer.Views
             Process();
         }
 
+        private void btn_clearlog_Click(object sender, RoutedEventArgs e)
+        {
+            txt_log.Clear();
+        }
+
+        private void ProcessSubmit(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Process();
+            }
+        }
+
         private void Process()
         {
             bool shouldSimulate = (bool)chkbx_simulate.IsChecked;
             int selected = cmb_sanitize.SelectedIndex;
             try
             {
-                FileProcessor fp = new FileProcessor(configs, txt_srcFolder.Text);
-                fp.LogChanged += new EventHandler<LogEventArgs>(logUpdated);
-                Thread oThread = new Thread(() => fp.processFiles(shouldSimulate, selected));
-                oThread.Start();
+                //FileProcessor fp = new FileProcessor(configs, txt_srcFolder.Text);
+                //fp.LogChanged += new EventHandler<LogEventArgs>(logUpdated);
+                //Thread oThread = new Thread(() => fp.processFiles(shouldSimulate, selected));
+                //oThread.Start();
             }
             catch (Exception ex)
             {

@@ -1,20 +1,9 @@
 ﻿using DLOrganizer.Model;
 using DLOrganizer.Properties;
 using FolderSelect;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DLOrganizer.Views
 {
@@ -26,6 +15,14 @@ namespace DLOrganizer.Views
         public ConfigView()
         {
             InitializeComponent();
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            txt_configName.KeyUp += SubmitAddOrUpdate;
+            txt_configExt.KeyUp += SubmitAddOrUpdate;
+            txt_configDest.KeyUp += SubmitAddOrUpdate;
         }
 
         private void btn_browsedelete_Click(object sender, RoutedEventArgs e)
@@ -44,7 +41,7 @@ namespace DLOrganizer.Views
             else
             {
                 int curIndex = lstb_configs.SelectedIndex;
-                configs.RemoveAt(lstb_configs.SelectedIndex);
+                //configs.RemoveAt(lstb_configs.SelectedIndex);
                 lstb_configs.Items.Refresh();
                 if (lstb_configs.Items.Count == curIndex)
                 {
@@ -59,13 +56,13 @@ namespace DLOrganizer.Views
 
         private void btn_addupdate_Click(object sender, RoutedEventArgs e)
         {
-            AddOrUpdate();
+            //AddOrUpdate();
         }
 
         private void btn_newconfig_Click(object sender, RoutedEventArgs e)
         {
             lstb_configs.UnselectAll();
-            clearConfigText();
+            //clearConfigText();
             txt_configName.Focus();
         }
 
@@ -74,53 +71,32 @@ namespace DLOrganizer.Views
             int index = lstb_configs.SelectedIndex;
             if (index == -1)
             {
-                clearConfigText();
+                //clearConfigText();
                 btn_addupdate.Content = "Add";
                 btn_browsedelete.Content = "Browse";
             }
             else
             {
-                Config config = configs[index];
+                /*Config config = configs[index];
                 txt_configName.Text = config.Name;
                 txt_configExt.Text = config.Ext;
                 txt_configDest.Text = config.Destination;
                 txt_configName.Focus();
                 btn_addupdate.Content = "Update";
-                btn_browsedelete.Content = "Delete";
+                btn_browsedelete.Content = "Delete";*/
             }
         }
 
-        private void AddOrUpdate()
+        private void SubmitAddOrUpdate(object sender, KeyEventArgs e)
         {
-            string name = txt_configName.Text;
-            string ext = txt_configExt.Text;
-            string dest = txt_configDest.Text;
-            if (lstb_configs.SelectedIndex == -1)
+            if (e.Key == Key.Enter)
             {
-                Config config = new Config(name, ext, dest);
-                configs.Add(config);
-                clearConfigText();
-                txt_configName.Focus();
-            }
-            else
-            {
-                int index = lstb_configs.SelectedIndex;
-                Config config = configs[index];
-                config.Name = name;
-                config.Ext = ext;
-                config.Destination = dest;
-                lstb_configs.Items.Refresh();
-                lstb_configs.UnselectAll();
-                clearConfigText();
-                txt_configName.Focus();
+                //AddOrUpdate();
             }
         }
 
-        private void clearConfigText()
-        {
-            txt_configName.Text = "";
-            txt_configExt.Text = "";
-            txt_configDest.Text = "";
-        }
+        
+
+        
     }
 }

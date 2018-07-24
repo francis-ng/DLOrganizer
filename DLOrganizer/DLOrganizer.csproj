@@ -64,6 +64,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\ButtonCommand.cs" />
     <Compile Include="ConfigProvider\ConfigReader.cs" />
     <Compile Include="ConfigProvider\ConfigWriter.cs" />
     <Compile Include="FileProcessor.cs" />
