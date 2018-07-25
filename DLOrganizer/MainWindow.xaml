@@ -12,13 +12,13 @@
         fw:PointerTracker.Enabled="True" >
     <Window.Resources>
         <DataTemplate x:Name="mainViewTemplate" DataType="{x:Type viewmodels:MainViewModel}">
-            <views:MainView DataContext="{Binding}" />
+            <views:MainView DataContext="{Binding}" Focusable="True" />
         </DataTemplate>
         <DataTemplate x:Name="configViewTemplate" DataType="{x:Type viewmodels:ConfigViewModel}">
-            <views:ConfigView DataContext="{Binding}" />
+            <views:ConfigView DataContext="{Binding}" Focusable="True" />
         </DataTemplate>
         <DataTemplate x:Name="aboutViewTemplate" DataType="{x:Type viewmodels:AboutViewModel}">
-            <views:AboutView DataContext="{Binding}" />
+            <views:AboutView DataContext="{Binding}" Focusable="True" />
         </DataTemplate>
         <local:MainWindow x:Key="windowobj" />
     </Window.Resources>

@@ -7,6 +7,9 @@
              xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="960">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Return" Command="{Binding Process}" CommandParameter="{Binding Simulate}" />
+    </UserControl.InputBindings>
     <Grid Margin="15,10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*" />
@@ -23,17 +26,14 @@
         </Grid.RowDefinitions>
 
         <Label Content="Scan Directory" Grid.Row="0" Grid.Column="0" FontWeight="Bold" />
-        <TextBox x:Name="txt_srcFolder" MinHeight="30" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" Text="{Binding Path=SourceFolder}" Style="{StaticResource TextBoxRevealStyle}"/>
-        <Button x:Name="btn_browse" Content="Browse" MinHeight="30" Click="btn_browse_Click" Grid.Row="1" Grid.Column="1" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
-        <Button x:Name="btn_process" Content="Process" MinHeight="30" Click="btn_process_Click" Grid.Row="1" Grid.Column="2" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
-        <ComboBox x:Name="cmb_sanitize" Grid.Row="2" Grid.Column="0" MinHeight="30" Margin="0,5,5,5">
-            <ComboBoxItem IsSelected="True">Don't standardize filenames</ComboBoxItem>
-            <ComboBoxItem>Change '_' to ' '</ComboBoxItem>
-            <ComboBoxItem>Change ' ' to '_'</ComboBoxItem>
-        </ComboBox>
-        <CheckBox x:Name="chkbx_simulate" IsChecked="{Binding Path=Simulate}" Content="Simulate" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5" />
+        <TextBox MinHeight="30" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Text="{Binding SourceFolder}" Style="{StaticResource TextBoxRevealStyle}"/>
+        <Button Command="{Binding BrowseCommand}" CommandParameter="{Binding Simulate}" Content="Browse" MinHeight="30" Grid.Row="1" Grid.Column="1" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
+        <Button Command="{Binding ProcessCommand}" CommandParameter="{Binding Simulate}" Content="Process" MinHeight="30" Grid.Row="1" Grid.Column="2" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
+        <ComboBox Grid.Row="2" Grid.Column="0" MinHeight="30" Margin="0,5,5,5" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                  ItemsSource="{Binding SanitizeTypes}" SelectedValue="{Binding SelectedSanitize, Mode=TwoWay}" DisplayMemberPath="Name" SelectedValuePath="Value" />
+        <CheckBox IsChecked="{Binding Path=Simulate}" Content="Simulate" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5" />
         <Label Content="Log" Grid.Row="3" Grid.Column="0" FontWeight="Bold" Margin="0,10,0,0" />
-        <TextBox x:Name="txt_log" Text="{Binding Path=LogContents}" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBoxRevealStyle}"/>
-        <Button x:Name="btn_clearlog" Content="Clear Log" Click="btn_clearlog_Click" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,0" VerticalAlignment="Top" Style="{StaticResource ButtonRevealStyle}" />
+        <TextBox Text="{Binding LogContents}" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBoxRevealStyle}"/>
+        <Button Command="{Binding ClearLogCommand}" CommandParameter="{Binding Simulate}" Content="Clear Log" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,0" VerticalAlignment="Top" Style="{StaticResource ButtonRevealStyle}" />
     </Grid>
 </UserControl>

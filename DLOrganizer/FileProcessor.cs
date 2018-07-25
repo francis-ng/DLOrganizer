@@ -1,13 +1,10 @@
-﻿using System;
+﻿using DLOrganizer.Model;
+using DLOrganizer.Utils;
+using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.FileIO;
-using DLOrganizer.Model;
-using DLOrganizer.Utils;
 
 namespace DLOrganizer
 {
@@ -15,12 +12,12 @@ namespace DLOrganizer
     {
         private string _activeDir;
         private List<string> _fileList;
-        private ObservableCollection<Config> _configs;
+        private List<Config> _configs;
         private static List<string> _logs;
 
         public event EventHandler<LogEventArgs> LogChanged;
 
-        public FileProcessor(ObservableCollection<Config> configs, string srcDir)
+        public FileProcessor(List<Config> configs, string srcDir)
         {
             _configs = configs;
             _activeDir = srcDir;

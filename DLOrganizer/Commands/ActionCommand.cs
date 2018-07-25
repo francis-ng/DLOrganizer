@@ -3,14 +3,14 @@ using System.Windows.Input;
 
 namespace DLOrganizer.Commands
 {
-    public class ButtonCommand<T> : ICommand
+    public class ActionCommand<T> : ICommand
     {
         private Action<T> ExecuteFunc;
         private Func<bool> ExecuteAllowed;
 
         public event EventHandler CanExecuteChanged;
 
-        public ButtonCommand(Action<T> func, Func<bool> allowed)
+        public ActionCommand(Action<T> func, Func<bool> allowed)
         {
             ExecuteFunc = func;
             ExecuteAllowed = allowed;

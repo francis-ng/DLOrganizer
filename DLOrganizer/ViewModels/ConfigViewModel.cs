@@ -1,48 +1,187 @@
-﻿using DLOrganizer.ConfigProvider;
+﻿using DLOrganizer.Commands;
+using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
+using DLOrganizer.Properties;
+using FolderSelect;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
 {
     public class ConfigViewModel
     {
         private string configFile;
+        private ActionCommand<bool> browseDeleteCommand;
+        private ActionCommand<bool> addUpdateCommand;
+        private ActionCommand<bool> newConfigCommand;
+        private int selectedConfig;
 
+        #region Properties
         public ObservableCollection<Config> List_Configs
         {
             get; set;
         }
 
-        public string TxtBox_FileName
+        public string BrowseDeleteButtonContent
         {
             get; set;
         }
 
-        public string TxtBox_Extension
+        public string AddUpdateButtonContent
         {
             get; set;
         }
 
-        public string TxtBox_Destination
+        public string ConfigName
         {
             get; set;
         }
+
+        public string Extension
+        {
+            get; set;
+        }
+
+        public string Destination
+        {
+            get; set;
+        }
+
+        public bool AnyConfigsSelected
+        {
+            get
+            {
+                return SelectedConfig >= 0;
+            }
+        }
+
+        public int SelectedConfig
+        {
+            get
+            {
+                return selectedConfig;
+            }
+            set
+            {
+                if (selectedConfig != value)
+                {
+                    selectedConfig = value;
+                    ConfigSelectionChanged();
+                }
+            }
+        }
+
+        public ICommand BrowseDeleteCommand
+        {
+            get
+            {
+                if (browseDeleteCommand == null)
+                {
+                    browseDeleteCommand = new ActionCommand<bool>(this.BrowseOrDelete, this.CanPerformCommand);
+                }
+                return browseDeleteCommand;
+            }
+        }
+
+        public ICommand AddUpdateCommand
+        {
+            get
+            {
+                if (addUpdateCommand == null)
+                {
+                    addUpdateCommand = new ActionCommand<bool>(this.AddOrUpdate, this.CanPerformCommand);
+                }
+                return addUpdateCommand;
+            }
+        }
+
+        public ICommand NewConfigCommand
+        {
+            get
+            {
+                if (newConfigCommand == null)
+                {
+                    newConfigCommand = new ActionCommand<bool>(this.NewConfig, this.CanPerformCommand);
+                }
+                return newConfigCommand;
+            }
+        }
+        #endregion
 
         public ConfigViewModel(string configFile)
         {
             this.configFile = configFile;
+            SetBrowseAddMode();
+            LoadConfigs();
         }
 
+        #region Commands
+        private void AddOrUpdate(bool configsSelected)
+        {
+            if (!AnyConfigsSelected)
+            {
+                Config config = new Config(ConfigName, Extension, Destination);
+                List_Configs.Add(config);
+                ClearConfigText();
+                //Focus name field
+            }
+            else
+            {
+                Config config = List_Configs[SelectedConfig];
+                config.Name = ConfigName;
+                config.Ext = Extension;
+                config.Destination = Destination;
+                SelectedConfig = -1;
+                ClearConfigText();
+                //Focus name field
+            }
+        }
+
+        private void BrowseOrDelete(bool configsSelected)
+        {
+            if (!AnyConfigsSelected)
+            {
+                FolderSelectDialog fldrDialog = new FolderSelectDialog();
+                fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
+                fldrDialog.ShowDialog();
+                if (fldrDialog.FileName != "")
+                {
+                    Destination = fldrDialog.FileName;
+                    // Focus AddUpdate button
+                }
+            }
+            else
+            {
+                List_Configs.RemoveAt(SelectedConfig);
+                if (List_Configs.Count == SelectedConfig)
+                {
+                    SelectedConfig--;
+                }
+                else if (List_Configs.Count > 0)
+                {
+                    SelectedConfig = SelectedConfig;
+                }
+            }
+        }
+
+        private void NewConfig(bool dummy)
+        {
+            //Unselect all
+            ClearConfigText();
+            //Focus name field
+        }
+        #endregion
+
+        #region Helper Functions
         public void SaveConfigs()
         {
             try
             {
-                List<Config> config = new List<Config>(List_Configs);
-                ConfigWriter writer = new ConfigWriter(configFile, config);
+                ConfigManager.SaveConfigs(new List<Config>(List_Configs), configFile);
             }
             catch (IOException ex)
             {
@@ -66,7 +205,8 @@ namespace DLOrganizer.ViewModels
         {
             try
             {
-                List_Configs = new ObservableCollection<Config>(new ConfigReader(configFile).getConfigs());
+                ConfigManager.LoadConfigs(configFile);
+                List_Configs = new ObservableCollection<Config>(ConfigManager.Configs);
             }
             catch (InvalidOperationException ex)
             {
@@ -87,34 +227,54 @@ namespace DLOrganizer.ViewModels
             }
         }
 
-        private void AddOrUpdate()
-        {/*
-            if (lstb_configs.SelectedIndex == -1)
+        private void SetBrowseAddMode()
+        {
+            BrowseDeleteButtonContent = @"Browse";
+            AddUpdateButtonContent = @"Add";
+        }
+
+        private void SetUpdateDeleteMode()
+        {
+            BrowseDeleteButtonContent = @"Delete";
+            AddUpdateButtonContent = @"Update";
+        }
+
+        private void ConfigSelectionChanged()
+        {
+            if (SelectedConfig == -1)
             {
-                Config config = new Config(TxtBox_FileName, TxtBox_Extension, TxtBox_Destination);
-                //configs.Add(config);
                 ClearConfigText();
-                txt_configName.Focus();
+                SetBrowseAddMode();
             }
             else
             {
-                int index = lstb_configs.SelectedIndex;
-                Config config = List_Configs[index];
-                config.Name = name;
-                config.Ext = ext;
-                config.Destination = dest;
-                lstb_configs.Items.Refresh();
-                lstb_configs.UnselectAll();
-                ClearConfigText();
-                txt_configName.Focus();
-            }*/
+                Config config = List_Configs[SelectedConfig];
+                ConfigName = config.Name;
+                Extension = config.Ext;
+                Destination = config.Destination;
+                //Focus name field
+                SetUpdateDeleteMode();
+            }
         }
 
         private void ClearConfigText()
         {
-            TxtBox_FileName = "";
-            TxtBox_Extension = "";
-            TxtBox_Destination = "";
+            ConfigName = "";
+            Extension = "";
+            Destination = "";
         }
+        #endregion
+
+        #region Command Validations
+        private bool IsConfigSelected()
+        {
+            return AnyConfigsSelected;
+        }
+
+        private bool CanPerformCommand()
+        {
+            return true;
+        }
+        #endregion
     }
 }

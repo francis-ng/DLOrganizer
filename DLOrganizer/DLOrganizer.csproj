@@ -64,11 +64,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Commands\ButtonCommand.cs" />
+    <Compile Include="Commands\ActionCommand.cs" />
+    <Compile Include="ConfigProvider\ConfigManager.cs" />
     <Compile Include="ConfigProvider\ConfigReader.cs" />
     <Compile Include="ConfigProvider\ConfigWriter.cs" />
     <Compile Include="FileProcessor.cs" />
     <Compile Include="Model\Config.cs" />
+    <Compile Include="Model\SanitizeType.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\FolderSelectDialog.cs" />
     <Compile Include="Utils\LogEventArgs.cs" />

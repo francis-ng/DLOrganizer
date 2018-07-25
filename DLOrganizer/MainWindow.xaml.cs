@@ -18,7 +18,7 @@ namespace DLOrganizer
         private ConfigViewModel configViewModel;
         private AboutViewModel aboutViewModel;
 
-        private ButtonCommand<int> navCommand;
+        private ActionCommand<int> navCommand;
 
         public List<NavButton> MainButtons
         {
@@ -31,7 +31,7 @@ namespace DLOrganizer
             {
                 if (navCommand == null)
                 {
-                    navCommand = new ButtonCommand<int>(this.ChangePage, this.CanNavigate);
+                    navCommand = new ActionCommand<int>(this.ChangePage, this.CanNavigate);
                 }
                 return navCommand;
             }
@@ -53,7 +53,7 @@ namespace DLOrganizer
             MainButtons.Add(new NavButton("About", NavigateCommand, 2));
             MenuItems.ItemsSource = MainButtons;
 
-            navCommand = new ButtonCommand<int>(ChangePage, CanNavigate);
+            navCommand = new ActionCommand<int>(ChangePage, CanNavigate);
 
             mainViewModel = new MainViewModel();
             configViewModel = new ConfigViewModel(configFile);
