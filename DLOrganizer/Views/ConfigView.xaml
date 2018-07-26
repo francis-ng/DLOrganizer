@@ -34,15 +34,15 @@
             <Label Content="Name" Grid.Column="0" Grid.Row="0" />
             <Label Content="Extension" Grid.Column="1" Grid.Row="0" />
             <Label Content="Destination" Grid.Column="2" Grid.Row="0" />
-            <TextBox Grid.Column="0" Grid.Row="1" Margin="0,0,10,0" MinHeight="30" Text="{Binding ConfigName, Mode=TwoWay}"
+            <TextBox Grid.Column="0" Grid.Row="1" Margin="0,0,10,0" MinHeight="30" Text="{Binding ConfigName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      VerticalAlignment="Stretch" VerticalContentAlignment="Center" Style="{StaticResource TextBoxRevealStyle}"/>
-            <TextBox Grid.Column="1" Grid.Row="1" Margin="0,0,10,0" MinHeight="30" Text="{Binding Extension, Mode=TwoWay}"
+            <TextBox Grid.Column="1" Grid.Row="1" Margin="0,0,10,0" MinHeight="30" Text="{Binding Extension, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      VerticalAlignment="Stretch" VerticalContentAlignment="Center" Style="{StaticResource TextBoxRevealStyle}"/>
-            <TextBox Grid.Column="2" Grid.Row="1" Margin="0,0,10,0" MinHeight="30" Text="{Binding Destination, Mode=TwoWay}"
+            <TextBox Grid.Column="2" Grid.Row="1" Margin="0,0,10,0" MinHeight="30" Text="{Binding Destination, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      VerticalAlignment="Stretch" VerticalContentAlignment="Center" Style="{StaticResource TextBoxRevealStyle}"/>
-            <Button Content="{Binding BrowseDeleteButtonContent, Mode=TwoWay}" Grid.Column="3" Grid.Row="1" Margin="10,0,10,0" MinHeight="30" 
+            <Button Content="{Binding BrowseDeleteButtonContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="1" Margin="10,0,10,0" MinHeight="30" 
                     Command="{Binding BrowseDeleteCommand}" CommandParameter="{Binding AnyConfigsSelected}" Style="{StaticResource ButtonRevealStyle}" />
-            <Button Content="{Binding AddUpdateButtonContent, Mode=TwoWay}" Grid.Column="4" Grid.Row="1" Margin="10,0,10,0" MinHeight="30" 
+            <Button Content="{Binding AddUpdateButtonContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="4" Grid.Row="1" Margin="10,0,10,0" MinHeight="30" 
                     Command="{Binding AddUpdateCommand}" CommandParameter="{Binding AnyConfigsSelected}" Style="{StaticResource ButtonRevealStyle}" />
         </Grid>
         <Grid fw:PointerTracker.Enabled="True" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" >

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace DLOrganizer.Model
 {
-    public class Config
+    public class Config : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private string name, ext, destination;
+
         public Config() { }
 
         public Config(string name, string ext, string dest)
@@ -19,19 +19,45 @@ namespace DLOrganizer.Model
 
         public string Name
         {
-            get;
-            set;
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+                NotifyPropertyChanged("Name");
+            }
         }
 
         public string Ext
         {
-            get;
-            set;
+            get
+            {
+                return ext;
+            }
+            set
+            {
+                ext = value;
+                NotifyPropertyChanged("Ext");
+            }
         }
 
         public string Destination {
-            get;
-            set;
+            get
+            {
+                return destination;
+            }
+            set
+            {
+                destination = value;
+                NotifyPropertyChanged("Destination");
+            }
+        }
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public override string ToString()

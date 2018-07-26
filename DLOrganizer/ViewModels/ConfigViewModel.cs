@@ -6,15 +6,19 @@ using FolderSelect;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
 {
-    public class ConfigViewModel
+    public class ConfigViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private string configFile;
+        private string _configName, _extension, _destination, _browseDeleteString, _addUpdateString;
         private ActionCommand<bool> browseDeleteCommand;
         private ActionCommand<bool> addUpdateCommand;
         private ActionCommand<bool> newConfigCommand;
@@ -28,27 +32,67 @@ namespace DLOrganizer.ViewModels
 
         public string BrowseDeleteButtonContent
         {
-            get; set;
+            get
+            {
+                return _browseDeleteString;
+            }
+            set
+            {
+                _browseDeleteString = value;
+                NotifyPropertyChanged("BrowseDeleteButtonContent");
+            }
         }
 
         public string AddUpdateButtonContent
         {
-            get; set;
+            get
+            {
+                return _addUpdateString;
+            }
+            set
+            {
+                _addUpdateString = value;
+                NotifyPropertyChanged("AddUpdateButtonContent");
+            }
         }
 
         public string ConfigName
         {
-            get; set;
+            get
+            {
+                return _configName;
+            }
+            set
+            {
+                _configName = value;
+                NotifyPropertyChanged("ConfigName");
+            }
         }
 
         public string Extension
         {
-            get; set;
+            get
+            {
+                return _extension;
+            }
+            set
+            {
+                _extension = value;
+                NotifyPropertyChanged("Extension");
+            }
         }
 
         public string Destination
         {
-            get; set;
+            get
+            {
+                return _destination;
+            }
+            set
+            {
+                _destination = value;
+                NotifyPropertyChanged("Destination");
+            }
         }
 
         public bool AnyConfigsSelected
@@ -119,6 +163,11 @@ namespace DLOrganizer.ViewModels
             LoadConfigs();
         }
 
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         #region Commands
         private void AddOrUpdate(bool configsSelected)
         {
@@ -137,6 +186,7 @@ namespace DLOrganizer.ViewModels
                 config.Destination = Destination;
                 SelectedConfig = -1;
                 ClearConfigText();
+                NotifyPropertyChanged("List_Configs");
                 //Focus name field
             }
         }
@@ -170,8 +220,9 @@ namespace DLOrganizer.ViewModels
 
         private void NewConfig(bool dummy)
         {
-            //Unselect all
+            SelectedConfig = -1;
             ClearConfigText();
+            SetBrowseAddMode();
             //Focus name field
         }
         #endregion
