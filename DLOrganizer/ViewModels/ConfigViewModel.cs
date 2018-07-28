@@ -22,7 +22,8 @@ namespace DLOrganizer.ViewModels
         private ActionCommand<bool> browseDeleteCommand;
         private ActionCommand<bool> addUpdateCommand;
         private ActionCommand<bool> newConfigCommand;
-        private int selectedConfig;
+        private Config selectedConfig;
+        private bool nameFocused;
 
         #region Properties
         public ObservableCollection<Config> List_Configs
@@ -99,11 +100,24 @@ namespace DLOrganizer.ViewModels
         {
             get
             {
-                return SelectedConfig >= 0;
+                return SelectedConfig != null;
             }
         }
 
-        public int SelectedConfig
+        public bool NameIsFocused
+        {
+            get
+            {
+                return nameFocused;
+            }
+            set
+            {
+                nameFocused = value;
+                NotifyPropertyChanged("NameIsFocused");
+            }
+        }
+
+        public Config SelectedConfig
         {
             get
             {
@@ -116,6 +130,7 @@ namespace DLOrganizer.ViewModels
                     selectedConfig = value;
                     ConfigSelectionChanged();
                 }
+                NotifyPropertyChanged("SelectedConfig");
             }
         }
 
@@ -171,28 +186,29 @@ namespace DLOrganizer.ViewModels
         #region Commands
         private void AddOrUpdate(bool configsSelected)
         {
+            // Add
             if (!AnyConfigsSelected)
             {
                 Config config = new Config(ConfigName, Extension, Destination);
                 List_Configs.Add(config);
                 ClearConfigText();
-                //Focus name field
+                RefocusNameField();
             }
+            // Update
             else
             {
-                Config config = List_Configs[SelectedConfig];
-                config.Name = ConfigName;
-                config.Ext = Extension;
-                config.Destination = Destination;
-                SelectedConfig = -1;
+                SelectedConfig.Name = ConfigName;
+                SelectedConfig.Ext = Extension;
+                SelectedConfig.Destination = Destination;
+                ClearConfigSelection();
                 ClearConfigText();
-                NotifyPropertyChanged("List_Configs");
-                //Focus name field
+                RefocusNameField();
             }
         }
 
         private void BrowseOrDelete(bool configsSelected)
         {
+            // Browse
             if (!AnyConfigsSelected)
             {
                 FolderSelectDialog fldrDialog = new FolderSelectDialog();
@@ -201,29 +217,30 @@ namespace DLOrganizer.ViewModels
                 if (fldrDialog.FileName != "")
                 {
                     Destination = fldrDialog.FileName;
-                    // Focus AddUpdate button
                 }
             }
             else
+            // Delete
             {
-                List_Configs.RemoveAt(SelectedConfig);
-                if (List_Configs.Count == SelectedConfig)
+                int index = List_Configs.IndexOf(SelectedConfig);
+                if (List_Configs.Count - 1 == index)
                 {
-                    SelectedConfig--;
+                    index--;
                 }
-                else if (List_Configs.Count > 0)
+                List_Configs.Remove(SelectedConfig);
+                if (index > 0)
                 {
-                    SelectedConfig = SelectedConfig;
+                    SelectedConfig = List_Configs[index];
                 }
             }
         }
 
         private void NewConfig(bool dummy)
         {
-            SelectedConfig = -1;
+            ClearConfigSelection();
             ClearConfigText();
             SetBrowseAddMode();
-            //Focus name field
+            RefocusNameField();
         }
         #endregion
 
@@ -278,6 +295,11 @@ namespace DLOrganizer.ViewModels
             }
         }
 
+        private void ClearConfigSelection()
+        {
+            SelectedConfig = null;
+        }
+
         private void SetBrowseAddMode()
         {
             BrowseDeleteButtonContent = @"Browse";
@@ -292,20 +314,25 @@ namespace DLOrganizer.ViewModels
 
         private void ConfigSelectionChanged()
         {
-            if (SelectedConfig == -1)
+            if (null == SelectedConfig)
             {
                 ClearConfigText();
                 SetBrowseAddMode();
             }
             else
             {
-                Config config = List_Configs[SelectedConfig];
-                ConfigName = config.Name;
-                Extension = config.Ext;
-                Destination = config.Destination;
-                //Focus name field
+                ConfigName = SelectedConfig.Name;
+                Extension = SelectedConfig.Ext;
+                Destination = SelectedConfig.Destination;
+                RefocusNameField();
                 SetUpdateDeleteMode();
             }
+        }
+
+        private void RefocusNameField()
+        {
+            NameIsFocused = false;
+            NameIsFocused = true;
         }
 
         private void ClearConfigText()

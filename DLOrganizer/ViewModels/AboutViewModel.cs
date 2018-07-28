@@ -1,21 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace DLOrganizer.ViewModels
 {
-    public class AboutViewModel
+    public class AboutViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private string version;
+
         public string Version
         {
-            get; set;
+            get
+            {
+                return version;
+            }
+            set
+            {
+                version = value;
+                NotifyPropertyChanged("Version");
+            }
         }
 
         public AboutViewModel(string version)
         {
-            Version = version;
+            Version = @"DLOrganizer " + version;
+        }
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
@@ -72,6 +73,7 @@
     <Compile Include="Model\Config.cs" />
     <Compile Include="Model\SanitizeType.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Utils\FocusExtension.cs" />
     <Compile Include="Utils\FolderSelectDialog.cs" />
     <Compile Include="Utils\LogEventArgs.cs" />
     <Compile Include="Utils\MappingProvider.cs">
@@ -140,17 +142,14 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <None Include="Resources\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\icon.ico" />
+    <Resource Include="Resources\logo.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\image.jpg" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

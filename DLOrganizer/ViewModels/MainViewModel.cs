@@ -6,26 +6,46 @@ using DLOrganizer.Utils;
 using FolderSelect;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading;
 using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
 {
-    public partial class MainViewModel
+    public partial class MainViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private ActionCommand<bool> processCommand;
         private ActionCommand<bool> browseCommand;
         private ActionCommand<bool> clearLogCommand;
+        private string sourceFolder, logContents;
 
         #region Properties
         public string SourceFolder
         {
-            get; set;
+            get
+            {
+                return sourceFolder;
+            }
+            set
+            {
+                sourceFolder = value;
+                NotifyPropertyChanged("SourceFolder");
+            }
         }
 
         public string LogContents
         {
-            get; set;
+            get
+            {
+                return logContents;
+            }
+            set
+            {
+                logContents = value;
+                NotifyPropertyChanged("LogContents");
+            }
         }
 
         public bool Simulate
@@ -91,6 +111,11 @@ namespace DLOrganizer.ViewModels
             SanitizeTypes.Add(new SanitizeType(@"Change ' ' to '_'", 0));
         }
 
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         #region Commands
         private void Process(bool simulate)
         {
@@ -115,7 +140,6 @@ namespace DLOrganizer.ViewModels
             if (fldrDialog.FileName != "")
             {
                 SourceFolder = fldrDialog.FileName;
-                //btn_process.Focus();
             }
         }
 

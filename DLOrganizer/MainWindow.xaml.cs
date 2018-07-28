@@ -11,7 +11,7 @@ namespace DLOrganizer
     /// </summary>
     public partial class MainWindow
     {
-        private const string VERSION = "v1.0.4";
+        private const string VERSION = "v2.0.0";
         private const string configFile = "config.xml";
 
         private MainViewModel mainViewModel;
@@ -58,8 +58,7 @@ namespace DLOrganizer
             mainViewModel = new MainViewModel();
             configViewModel = new ConfigViewModel(configFile);
             aboutViewModel = new AboutViewModel(VERSION);
-
-            configViewModel.LoadConfigs();
+            
             ChangePage(0);
         }
 
@@ -72,7 +71,7 @@ namespace DLOrganizer
 
         public void ChangePage(int page)
         {
-            // save configs if not null
+            configViewModel.SaveConfigs();
             switch (page)
             {
                 case 0:
