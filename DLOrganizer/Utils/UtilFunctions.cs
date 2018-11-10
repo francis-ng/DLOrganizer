@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 
 namespace DLOrganizer.Utils
 {
@@ -8,7 +6,7 @@ namespace DLOrganizer.Utils
     {
         public static string RemoveWhitespace(this string str)
         {
-            StringBuilder sb = new StringBuilder(str.Length);
+            var sb = new StringBuilder(str.Length);
             for (int i = 0; i < str.Length; i++)
             {
                 char c = str[i];

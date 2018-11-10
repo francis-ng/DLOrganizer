@@ -121,9 +121,9 @@ namespace DLOrganizer.ViewModels
         {
             try
             {
-                FileProcessor fp = new FileProcessor(ConfigManager.Configs, SourceFolder);
+                var fp = new FileProcessor(ConfigManager.Configs, SourceFolder);
                 fp.LogChanged += new EventHandler<LogEventArgs>(LogUpdated);
-                Thread oThread = new Thread(() => fp.processFiles(Simulate, SelectedSanitize));
+                var oThread = new Thread(() => fp.processFiles(Simulate, SelectedSanitize));
                 oThread.Start();
             }
             catch (Exception ex)
@@ -134,7 +134,7 @@ namespace DLOrganizer.ViewModels
 
         private void Browse(bool dummy)
         {
-            FolderSelectDialog fldrDialog = new FolderSelectDialog();
+            var fldrDialog = new FolderSelectDialog();
             fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
             fldrDialog.ShowDialog();
             if (fldrDialog.FileName != "")

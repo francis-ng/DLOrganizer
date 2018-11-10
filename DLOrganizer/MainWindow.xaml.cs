@@ -12,7 +12,7 @@ namespace DLOrganizer
     public partial class MainWindow
     {
         private const string VERSION = "v2.0.0";
-        private const string configFile = "config.xml";
+        private const string configFile = "config.json";
 
         private MainViewModel mainViewModel;
         private ConfigViewModel configViewModel;

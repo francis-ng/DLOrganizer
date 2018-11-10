@@ -189,7 +189,7 @@ namespace DLOrganizer.ViewModels
             // Add
             if (!AnyConfigsSelected)
             {
-                Config config = new Config(ConfigName, Extension, Destination);
+                var config = new Config(ConfigName, Extension, Destination);
                 List_Configs.Add(config);
                 ClearConfigText();
                 RefocusNameField();
@@ -211,7 +211,7 @@ namespace DLOrganizer.ViewModels
             // Browse
             if (!AnyConfigsSelected)
             {
-                FolderSelectDialog fldrDialog = new FolderSelectDialog();
+                var fldrDialog = new FolderSelectDialog();
                 fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
                 fldrDialog.ShowDialog();
                 if (fldrDialog.FileName != "")

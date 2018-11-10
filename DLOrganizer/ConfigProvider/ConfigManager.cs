@@ -1,5 +1,8 @@
 ﻿using DLOrganizer.Model;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DLOrganizer.ConfigProvider
 {
@@ -21,13 +24,45 @@ namespace DLOrganizer.ConfigProvider
 
         public static void LoadConfigs(string configFile)
         {
-            configs = new List<Config>(new ConfigReader(configFile).getConfigs());
+            if (File.Exists(configFile))
+            {
+                var serializer = new JsonSerializer();
+                try
+                {
+                    using (StreamReader sr = new StreamReader(configFile))
+                    {
+                        using (JsonReader reader = new JsonTextReader(sr))
+                        {
+                            configs = serializer.Deserialize<List<Config>>(reader);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
         }
 
         public static void SaveConfigs(List<Config> configs, string configFile)
         {
             ConfigManager.configs = configs;
-            ConfigWriter writer = new ConfigWriter(configFile, Configs);
+
+            var serializer = new JsonSerializer();
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(configFile))
+                {
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                        serializer.Serialize(writer, Configs, typeof(List<Config>));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

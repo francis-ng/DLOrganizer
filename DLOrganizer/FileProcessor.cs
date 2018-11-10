@@ -27,10 +27,7 @@ namespace DLOrganizer
 
         protected virtual void LogAdded(LogEventArgs e)
         {
-            if (LogChanged != null)
-            {
-                LogChanged(this, e);
-            }
+            LogChanged?.Invoke(this, e);
         }
 
         public void processFiles(bool simulate, int sanitize)
@@ -41,15 +38,15 @@ namespace DLOrganizer
                 List<string> files;
                 if (config.Ext.Equals(""))
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name)).ToList<string>();
+                    files = _fileList.Where(s => s.Contains(config.Name)).ToList();
                 }
                 else if (config.Name.Equals(""))
                 {
-                    files = _fileList.Where(s => s.EndsWith(config.Ext)).ToList<string>();
+                    files = _fileList.Where(s => s.EndsWith(config.Ext)).ToList();
                 }
                 else
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name) && s.EndsWith(config.Ext)).ToList<string>();
+                    files = _fileList.Where(s => s.Contains(config.Name) && s.EndsWith(config.Ext)).ToList();
                 }
                 foreach (string file in files)
                 {
@@ -62,7 +59,7 @@ namespace DLOrganizer
         {
             if (dest != null)
             {
-                LogEventArgs args = new LogEventArgs();
+                var args = new LogEventArgs();
                 if (!Directory.Exists(dest))
                 {
                     if (!simulate) Directory.CreateDirectory(dest);
@@ -102,7 +99,7 @@ namespace DLOrganizer
                     if (!simulate) FileSystem.RenameFile(_fileList[i], newName);
                     _fileList[i] = Path.GetDirectoryName(_fileList[i]) + @"\" + newName;
                     log += newName + ".";
-                    LogEventArgs args = new LogEventArgs();
+                    var args = new LogEventArgs();
                     args.LogMessage = log;
                     LogAdded(args);
                 }
