@@ -1,13 +1,10 @@
-﻿using System;
+﻿using DLOrganizer.Model;
+using DLOrganizer.Utils;
+using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.FileIO;
-using DLOrganizer.Model;
-using DLOrganizer.Utils;
 
 namespace DLOrganizer
 {
@@ -15,12 +12,12 @@ namespace DLOrganizer
     {
         private string _activeDir;
         private List<string> _fileList;
-        private ObservableCollection<Config> _configs;
+        private List<Config> _configs;
         private static List<string> _logs;
 
         public event EventHandler<LogEventArgs> LogChanged;
 
-        public FileProcessor(ObservableCollection<Config> configs, string srcDir)
+        public FileProcessor(List<Config> configs, string srcDir)
         {
             _configs = configs;
             _activeDir = srcDir;
@@ -30,10 +27,7 @@ namespace DLOrganizer
 
         protected virtual void LogAdded(LogEventArgs e)
         {
-            if (LogChanged != null)
-            {
-                LogChanged(this, e);
-            }
+            LogChanged?.Invoke(this, e);
         }
 
         public void processFiles(bool simulate, int sanitize)
@@ -44,15 +38,15 @@ namespace DLOrganizer
                 List<string> files;
                 if (config.Ext.Equals(""))
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name)).ToList<string>();
+                    files = _fileList.Where(s => s.Contains(config.Name)).ToList();
                 }
                 else if (config.Name.Equals(""))
                 {
-                    files = _fileList.Where(s => s.EndsWith(config.Ext)).ToList<string>();
+                    files = _fileList.Where(s => s.EndsWith(config.Ext)).ToList();
                 }
                 else
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name) && s.EndsWith(config.Ext)).ToList<string>();
+                    files = _fileList.Where(s => s.Contains(config.Name) && s.EndsWith(config.Ext)).ToList();
                 }
                 foreach (string file in files)
                 {
@@ -65,7 +59,7 @@ namespace DLOrganizer
         {
             if (dest != null)
             {
-                LogEventArgs args = new LogEventArgs();
+                var args = new LogEventArgs();
                 if (!Directory.Exists(dest))
                 {
                     if (!simulate) Directory.CreateDirectory(dest);
@@ -105,7 +99,7 @@ namespace DLOrganizer
                     if (!simulate) FileSystem.RenameFile(_fileList[i], newName);
                     _fileList[i] = Path.GetDirectoryName(_fileList[i]) + @"\" + newName;
                     log += newName + ".";
-                    LogEventArgs args = new LogEventArgs();
+                    var args = new LogEventArgs();
                     args.LogMessage = log;
                     LogAdded(args);
                 }
