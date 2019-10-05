@@ -2,12 +2,10 @@
 using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
 using DLOrganizer.Properties;
-using DLOrganizer.Utils;
 using FolderSelect;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -118,14 +116,13 @@ namespace DLOrganizer.ViewModels
         }
 
         #region Commands
-        private void Process(bool simulate)
+        private async void Process(bool simulate)
         {
             try
             {
                 var fp = new FileProcessor(ConfigManager.Configs, SourceFolder);
-                fp.LogChanged += new EventHandler<LogEventArgs>(LogUpdated);
-                var oThread = new Thread(() => fp.processFiles(Simulate, SelectedSanitize));
-                oThread.Start();
+                fp.LogChanged += new EventHandler<LogEvent>(LogUpdated);
+                await fp.processFiles(Simulate, SelectedSanitize);
             }
             catch (Exception ex)
             {
@@ -162,7 +159,7 @@ namespace DLOrganizer.ViewModels
             LogContents += message + "\n";
         }
 
-        private void LogUpdated(object sender, LogEventArgs e)
+        private void LogUpdated(object sender, LogEvent e)
         {
             AddToLog(e.LogMessage);
         }

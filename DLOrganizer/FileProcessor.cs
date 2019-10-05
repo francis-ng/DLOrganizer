@@ -1,10 +1,11 @@
 ﻿using DLOrganizer.Model;
-using DLOrganizer.Utils;
 using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using static DLOrganizer.Model.LogEvent;
 
 namespace DLOrganizer
 {
@@ -15,7 +16,7 @@ namespace DLOrganizer
         private List<Config> _configs;
         private static List<string> _logs;
 
-        public event EventHandler<LogEventArgs> LogChanged;
+        public event EventHandler<LogEvent> LogChanged;
 
         public FileProcessor(List<Config> configs, string srcDir)
         {
@@ -25,12 +26,12 @@ namespace DLOrganizer
             _logs = new List<string>();
         }
 
-        protected virtual void LogAdded(LogEventArgs e)
+        protected virtual void LogAdded(LogEvent e)
         {
             LogChanged?.Invoke(this, e);
         }
 
-        public void processFiles(bool simulate, int sanitize)
+        public Task processFiles(bool simulate, int sanitize)
         {
             getFileList();
             sanitizeFilenames(sanitize, simulate);
@@ -54,23 +55,36 @@ namespace DLOrganizer
                     processFile(file, config.Destination, simulate);
                 }
             }
+            return Task.CompletedTask;
         }
 
         private void processFile(string file, string dest, bool simulate)
         {
             if (dest != null)
             {
-                var args = new LogEventArgs();
                 if (!Directory.Exists(dest))
                 {
                     if (!simulate) Directory.CreateDirectory(dest);
-                    args.LogMessage = "Created directory " + dest;
-                    LogAdded(args);
+                    LogAdded(
+                        new LogEvent
+                        {
+                            Type = EventType.FolderCreate,
+                            Destination = dest,
+                            Success = true
+                        }
+                    );
                 }
                 dest = Path.Combine(dest, Path.GetFileName(file));
                 if (!simulate) FileSystem.MoveFile(file, dest, UIOption.AllDialogs);
-                args.LogMessage = "Moved " + file + " to " + dest + ".";
-                LogAdded(args);
+                LogAdded(
+                    new LogEvent
+                    {
+                        Type = EventType.FileMove,
+                        Source = file,
+                        Destination = dest,
+                        Success = true
+                    }
+                );
             }
         }
 
@@ -84,7 +98,6 @@ namespace DLOrganizer
             for (int i = 0; i < _fileList.Count; i++)
             {
                 string fileName = Path.GetFileName(_fileList[i]);
-                string log = "Renamed " + fileName + " to ";
                 string newName = fileName;
                 switch (type)
                 {
@@ -99,10 +112,15 @@ namespace DLOrganizer
                 {
                     if (!simulate) FileSystem.RenameFile(_fileList[i], newName);
                     _fileList[i] = Path.GetDirectoryName(_fileList[i]) + @"\" + newName;
-                    log += newName + ".";
-                    var args = new LogEventArgs();
-                    args.LogMessage = log;
-                    LogAdded(args);
+                    LogAdded(
+                        new LogEvent
+                        {
+                            Type = EventType.FileRename,
+                            Source = fileName,
+                            Destination = newName,
+                            Success = true
+                        }
+                    );
                 }
             }
         }
