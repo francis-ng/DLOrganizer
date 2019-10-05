@@ -34,7 +34,8 @@ namespace DLOrganizer
         {
             getFileList();
             sanitizeFilenames(sanitize, simulate);
-            foreach (Config config in _configs) {
+            foreach (Config config in _configs)
+            {
                 List<string> files;
                 if (config.Ext.Equals(""))
                 {

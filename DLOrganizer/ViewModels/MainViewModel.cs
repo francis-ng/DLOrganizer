@@ -8,6 +8,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
@@ -135,11 +136,17 @@ namespace DLOrganizer.ViewModels
         private void Browse(bool dummy)
         {
             var fldrDialog = new FolderSelectDialog();
-            fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
-            fldrDialog.ShowDialog();
-            if (fldrDialog.FileName != "")
+            if (string.IsNullOrWhiteSpace(SourceFolder))
             {
-                SourceFolder = fldrDialog.FileName;
+                fldrDialog.Path = Settings.Default.DefaultSource;
+            }
+            else
+            {
+                fldrDialog.Path = SourceFolder;
+            }
+            if (fldrDialog.ShowDialog() == DialogResult.OK && fldrDialog.Path != "")
+            {
+                SourceFolder = fldrDialog.Path;
             }
         }
 

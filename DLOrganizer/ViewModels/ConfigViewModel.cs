@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
@@ -212,11 +213,17 @@ namespace DLOrganizer.ViewModels
             if (!AnyConfigsSelected)
             {
                 var fldrDialog = new FolderSelectDialog();
-                fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
-                fldrDialog.ShowDialog();
-                if (fldrDialog.FileName != "")
+                if (string.IsNullOrWhiteSpace(Destination))
                 {
-                    Destination = fldrDialog.FileName;
+                    fldrDialog.Path = Settings.Default.DefaultSource;
+                }
+                else
+                {
+                    fldrDialog.Path = Destination;
+                }
+                if (fldrDialog.ShowDialog() == DialogResult.OK && fldrDialog.Path != "")
+                {
+                    Destination = fldrDialog.Path;
                 }
             }
             else
@@ -251,13 +258,13 @@ namespace DLOrganizer.ViewModels
             {
                 ConfigManager.SaveConfigs(new List<Config>(List_Configs), configFile);
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 string warnText = @"Error when saving configuration file. Your current configuration has not been saved. Click Yes to try again, or No to continue without saving.";
                 string caption = "Configuration Save Error";
                 MessageBoxButton buttons = MessageBoxButton.YesNo;
                 MessageBoxImage icon = MessageBoxImage.Warning;
-                MessageBoxResult result = MessageBox.Show(warnText, caption, buttons, icon);
+                MessageBoxResult result = System.Windows.MessageBox.Show(warnText, caption, buttons, icon);
                 switch (result)
                 {
                     case MessageBoxResult.Yes:
@@ -276,20 +283,20 @@ namespace DLOrganizer.ViewModels
                 ConfigManager.LoadConfigs(configFile);
                 List_Configs = new ObservableCollection<Config>(ConfigManager.Configs);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 string warnText = @"Error reading configuration file. Click OK to start with a fresh file, or Cancel to exit.";
                 string caption = "Configuration Load Error";
                 MessageBoxButton buttons = MessageBoxButton.OKCancel;
                 MessageBoxImage icon = MessageBoxImage.Warning;
-                MessageBoxResult result = MessageBox.Show(warnText, caption, buttons, icon);
+                MessageBoxResult result = System.Windows.MessageBox.Show(warnText, caption, buttons, icon);
                 switch (result)
                 {
                     case MessageBoxResult.OK:
                         List_Configs = new ObservableCollection<Config>();
                         break;
                     case MessageBoxResult.Cancel:
-                        Application.Current.Shutdown();
+                        System.Windows.Application.Current.Shutdown();
                         break;
                 }
             }

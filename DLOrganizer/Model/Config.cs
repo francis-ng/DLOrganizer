@@ -43,7 +43,8 @@ namespace DLOrganizer.Model
             }
         }
 
-        public string Destination {
+        public string Destination
+        {
             get
             {
                 return destination;

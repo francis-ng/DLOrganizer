@@ -58,7 +58,7 @@ namespace DLOrganizer
             mainViewModel = new MainViewModel();
             configViewModel = new ConfigViewModel(configFile);
             aboutViewModel = new AboutViewModel(VERSION);
-            
+
             ChangePage(0);
         }
 
@@ -95,17 +95,17 @@ namespace DLOrganizer
         {
             public string Label
             {
-                get;set;
+                get; set;
             }
 
             public ICommand Command
             {
-                get;set;
+                get; set;
             }
 
             public int PageNumber
             {
-                get;set;
+                get; set;
             }
 
             public NavButton(string label, ICommand command, int page)

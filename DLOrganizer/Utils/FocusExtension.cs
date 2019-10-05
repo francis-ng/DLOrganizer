@@ -30,7 +30,8 @@ namespace DLOrganizer.Utils
             {
                 uie.Dispatcher.BeginInvoke(
                     new Action(
-                        delegate {
+                        delegate
+                        {
                             uie.Focus();
                             Keyboard.Focus(uie);
                         }
