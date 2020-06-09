@@ -1,10 +1,9 @@
 ﻿using DLOrganizer.Model;
-using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using static DLOrganizer.Model.LogEvent;
 
 namespace DLOrganizer
@@ -14,7 +13,6 @@ namespace DLOrganizer
         private string _activeDir;
         private List<string> _fileList;
         private List<Config> _configs;
-        private static List<string> _logs;
 
         public event EventHandler<LogEvent> LogChanged;
 
@@ -23,7 +21,7 @@ namespace DLOrganizer
             _configs = configs;
             _activeDir = srcDir;
             _fileList = new List<string>();
-            _logs = new List<string>();
+            GetFileList();
         }
 
         protected virtual void LogAdded(LogEvent e)
@@ -31,34 +29,42 @@ namespace DLOrganizer
             LogChanged?.Invoke(this, e);
         }
 
-        public Task processFiles(bool simulate, int sanitize)
+        public List<DLOJob> GenerateJobList(bool simulate, int sanitize)
         {
-            getFileList();
-            sanitizeFilenames(sanitize, simulate);
+            SanitizeFilenames(sanitize, simulate);
+            List<DLOJob> jobs = new List<DLOJob>();
             foreach (Config config in _configs)
             {
-                List<string> files;
-                if (config.Ext.Equals(""))
+                List<string> files = new List<string>();
+                if (string.IsNullOrEmpty(config.Ext))
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name)).ToList();
+                    files.AddRange(_fileList.Where(s => s.Contains(config.Name, StringComparison.OrdinalIgnoreCase)).ToList());
                 }
-                else if (config.Name.Equals(""))
+                else if (string.IsNullOrEmpty(config.Name))
                 {
-                    files = _fileList.Where(s => s.EndsWith(config.Ext)).ToList();
+                    files.AddRange(_fileList.Where(s => s.EndsWith(config.Ext, StringComparison.OrdinalIgnoreCase)).ToList());
                 }
                 else
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name) && s.EndsWith(config.Ext)).ToList();
+                    files.AddRange(_fileList.Where(s => s.Contains(config.Name, StringComparison.OrdinalIgnoreCase) && s.EndsWith(config.Ext, StringComparison.OrdinalIgnoreCase)).ToList());
                 }
                 foreach (string file in files)
                 {
-                    processFile(file, config.Destination, simulate);
+                    jobs.Add(new DLOJob { Source = file , Destination = config.Destination });
                 }
             }
-            return Task.CompletedTask;
+            return jobs;
         }
 
-        private void processFile(string file, string dest, bool simulate)
+        public void ProcessFiles(List<DLOJob> jobs, bool simulate)
+        {
+            foreach (DLOJob job in jobs)
+            {
+                ProcessFile(job.Source, job.Destination, simulate);
+            }
+        }
+
+        private void ProcessFile(string file, string dest, bool simulate)
         {
             if (dest != null)
             {
@@ -75,7 +81,8 @@ namespace DLOrganizer
                     );
                 }
                 dest = Path.Combine(dest, Path.GetFileName(file));
-                if (!simulate) FileSystem.MoveFile(file, dest, UIOption.AllDialogs);
+                if (simulate) Thread.Sleep(500);
+                else File.Move(file, dest); 
                 LogAdded(
                     new LogEvent
                     {
@@ -88,12 +95,12 @@ namespace DLOrganizer
             }
         }
 
-        private void getFileList()
+        private void GetFileList()
         {
-            _fileList = Directory.GetFiles(_activeDir).ToList<string>();
+            _fileList = Directory.GetFiles(_activeDir).ToList();
         }
 
-        public void sanitizeFilenames(int type, bool simulate)
+        public void SanitizeFilenames(int type, bool simulate)
         {
             for (int i = 0; i < _fileList.Count; i++)
             {
@@ -108,9 +115,9 @@ namespace DLOrganizer
                         newName = fileName.Replace(' ', '_');
                         break;
                 }
-                if (!newName.Equals(fileName))
+                if (!newName.Equals(fileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!simulate) FileSystem.RenameFile(_fileList[i], newName);
+                    if (!simulate) File.Move(_fileList[i], newName);
                     _fileList[i] = Path.GetDirectoryName(_fileList[i]) + @"\" + newName;
                     LogAdded(
                         new LogEvent

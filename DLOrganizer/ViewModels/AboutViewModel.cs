@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using DLOrganizer.Properties;
+using System.ComponentModel;
 
 namespace DLOrganizer.ViewModels
 {
@@ -17,13 +18,13 @@ namespace DLOrganizer.ViewModels
             set
             {
                 version = value;
-                NotifyPropertyChanged("Version");
+                NotifyPropertyChanged(nameof(Version));
             }
         }
 
         public AboutViewModel(string version)
         {
-            Version = @"DLOrganizer " + version;
+            Version = Strings.AppTitle + " " + version;
         }
 
         private void NotifyPropertyChanged(string propertyName)

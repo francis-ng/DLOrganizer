@@ -20,8 +20,8 @@ namespace DLOrganizer.Utils
 
         public static string FilterHTMLSpaces(this string str)
         {
-            string temp = str.Replace("&nbsp", "");
-            return temp.Replace(";;", ";");
+            string temp = str.Replace("&nbsp", "", System.StringComparison.OrdinalIgnoreCase);
+            return temp.Replace(";;", ";", System.StringComparison.OrdinalIgnoreCase);
         }
     }
 }

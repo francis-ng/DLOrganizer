@@ -8,12 +8,12 @@ namespace DLOrganizer.Utils
     {
         public static bool GetIsFocused(DependencyObject obj)
         {
-            return (bool)obj.GetValue(IsFocusedProperty);
+            return (bool)obj?.GetValue(IsFocusedProperty);
         }
 
         public static void SetIsFocused(DependencyObject obj, bool value)
         {
-            obj.SetValue(IsFocusedProperty, value);
+            obj?.SetValue(IsFocusedProperty, value);
         }
 
         public static readonly DependencyProperty IsFocusedProperty =

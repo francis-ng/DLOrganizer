@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using DLOrganizer.Properties;
+using System.Windows;
 
 namespace DLOrganizer
 {
@@ -7,5 +8,11 @@ namespace DLOrganizer
     /// </summary>
     public partial class App : Application
     {
+        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message, Strings.Exception, MessageBoxButton.OK, MessageBoxImage.Error);
+            e.Handled = true;
+            Current.Shutdown();
+        }
     }
 }

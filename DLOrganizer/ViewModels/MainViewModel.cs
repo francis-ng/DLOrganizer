@@ -6,6 +6,7 @@ using FolderSelect;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -19,6 +20,7 @@ namespace DLOrganizer.ViewModels
         private ActionCommand<bool> browseCommand;
         private ActionCommand<bool> clearLogCommand;
         private string sourceFolder, logContents;
+        private int totalFiles, filesCompleted;
 
         #region Properties
         public string SourceFolder
@@ -30,7 +32,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 sourceFolder = value;
-                NotifyPropertyChanged("SourceFolder");
+                NotifyPropertyChanged(nameof(SourceFolder));
             }
         }
 
@@ -43,7 +45,33 @@ namespace DLOrganizer.ViewModels
             set
             {
                 logContents = value;
-                NotifyPropertyChanged("LogContents");
+                NotifyPropertyChanged(nameof(LogContents));
+            }
+        }
+
+        public int TotalFiles
+        {
+            get
+            {
+                return totalFiles;
+            }
+            set
+            {
+                totalFiles = value;
+                NotifyPropertyChanged(nameof(TotalFiles));
+            }
+        }
+
+        public int FilesCompleted
+        {
+            get
+            {
+                return filesCompleted;
+            }
+            set
+            {
+                filesCompleted = value;
+                NotifyPropertyChanged(nameof(FilesCompleted));
             }
         }
 
@@ -63,7 +91,7 @@ namespace DLOrganizer.ViewModels
             {
                 if (processCommand == null)
                 {
-                    processCommand = new ActionCommand<bool>(this.Process, this.CanProcess);
+                    processCommand = new ActionCommand<bool>(Process, CanProcess);
                 }
                 return processCommand;
             }
@@ -75,7 +103,7 @@ namespace DLOrganizer.ViewModels
             {
                 if (browseCommand == null)
                 {
-                    browseCommand = new ActionCommand<bool>(this.Browse, this.CanBrowse);
+                    browseCommand = new ActionCommand<bool>(Browse, CanBrowse);
                 }
                 return browseCommand;
             }
@@ -87,7 +115,7 @@ namespace DLOrganizer.ViewModels
             {
                 if (clearLogCommand == null)
                 {
-                    clearLogCommand = new ActionCommand<bool>(this.ClearLog, this.CanClearLog);
+                    clearLogCommand = new ActionCommand<bool>(ClearLog, CanClearLog);
                 }
                 return clearLogCommand;
             }
@@ -108,6 +136,8 @@ namespace DLOrganizer.ViewModels
             SanitizeTypes.Add(new SanitizeType(@"Don't standardize filenames", 0));
             SanitizeTypes.Add(new SanitizeType(@"Change '_' to ' '", 0));
             SanitizeTypes.Add(new SanitizeType(@"Change ' ' to '_'", 0));
+            TotalFiles = 0;
+            FilesCompleted = 0;
         }
 
         private void NotifyPropertyChanged(string propertyName)
@@ -116,17 +146,20 @@ namespace DLOrganizer.ViewModels
         }
 
         #region Commands
-        private async void Process(bool simulate)
+        private void Process(bool simulate)
         {
             try
             {
                 var fp = new FileProcessor(ConfigManager.Configs, SourceFolder);
+                var jobList = fp.GenerateJobList(Simulate, SelectedSanitize);
+                TotalFiles = jobList.Count;
                 fp.LogChanged += new EventHandler<LogEvent>(LogUpdated);
-                await fp.processFiles(Simulate, SelectedSanitize);
+                Task.Factory.StartNew(() => fp.ProcessFiles(jobList, Simulate));
             }
             catch (Exception ex)
             {
                 AddToLog(ex.Message);
+                throw;
             }
         }
 
@@ -141,7 +174,7 @@ namespace DLOrganizer.ViewModels
             {
                 fldrDialog.Path = SourceFolder;
             }
-            if (fldrDialog.ShowDialog() == DialogResult.OK && fldrDialog.Path != "")
+            if (fldrDialog.ShowDialog() == DialogResult.OK && string.IsNullOrWhiteSpace(fldrDialog.Path))
             {
                 SourceFolder = fldrDialog.Path;
             }
@@ -161,6 +194,10 @@ namespace DLOrganizer.ViewModels
 
         private void LogUpdated(object sender, LogEvent e)
         {
+            if (e.Type == LogEvent.EventType.FileMove && e.Success)
+            {
+                FilesCompleted = filesCompleted + 1;
+            }
             AddToLog(e.LogMessage);
         }
         #endregion

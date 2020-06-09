@@ -1,12 +1,12 @@
 ﻿using DLOrganizer.Model;
-using Newtonsoft.Json;
-using System;
+using System.Text.Json;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DLOrganizer.ConfigProvider
 {
-    public class ConfigManager
+    public static class ConfigManager
     {
         private static List<Config> configs;
 
@@ -26,42 +26,17 @@ namespace DLOrganizer.ConfigProvider
         {
             if (File.Exists(configFile))
             {
-                var serializer = new JsonSerializer();
-                try
-                {
-                    using (StreamReader sr = new StreamReader(configFile))
-                    {
-                        using (JsonReader reader = new JsonTextReader(sr))
-                        {
-                            configs = serializer.Deserialize<List<Config>>(reader);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
+                var jsonString = File.ReadAllText(configFile);
+                configs = JsonSerializer.Deserialize<List<Config>>(jsonString);
             }
         }
 
-        public static void SaveConfigs(List<Config> configs, string configFile)
+        public static async Task SaveConfigs(List<Config> configs, string configFile)
         {
             ConfigManager.configs = configs;
-
-            var serializer = new JsonSerializer();
-            try
+            using (FileStream fs = File.Create(configFile))
             {
-                using (StreamWriter sw = new StreamWriter(configFile))
-                {
-                    using (JsonWriter writer = new JsonTextWriter(sw))
-                    {
-                        serializer.Serialize(writer, Configs, typeof(List<Config>));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                await JsonSerializer.SerializeAsync(fs, Configs).ConfigureAwait(false);
             }
         }
     }

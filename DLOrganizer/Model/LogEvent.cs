@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace DLOrganizer.Model
 {
@@ -43,11 +44,11 @@ namespace DLOrganizer.Model
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    _source = "";
+                    _destination = "";
                 }
                 else
                 {
-                    _source = value;
+                    _destination = value;
                 }
             }
         }
@@ -60,11 +61,11 @@ namespace DLOrganizer.Model
                 switch (Type)
                 {
                     case EventType.FileMove:
-                        return string.Format("Moved {0} to {1}", Source, Destination);
+                        return string.Format(CultureInfo.InvariantCulture, "Moved {0} to {1}", Source, Destination);
                     case EventType.FolderCreate:
-                        return string.Format("Created folder {0}", Destination);
+                        return string.Format(CultureInfo.InvariantCulture, "Created folder {0}", Destination);
                     case EventType.FileRename:
-                        return string.Format("Renamed {0} to {1}", Source, Destination);
+                        return string.Format(CultureInfo.InvariantCulture, "Renamed {0} to {1}", Source, Destination);
                     default:
                         return "Unknown event found";
                 }
