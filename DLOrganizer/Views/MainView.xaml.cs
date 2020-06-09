@@ -1,11 +1,4 @@
-﻿using DLOrganizer.Properties;
-using DLOrganizer.Utils;
-using FolderSelect;
-using System;
-using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+﻿using System.Windows.Controls;
 
 namespace DLOrganizer.Views
 {

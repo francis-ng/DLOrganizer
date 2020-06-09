@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 
 namespace DLOrganizer.Model
 {
@@ -26,7 +27,7 @@ namespace DLOrganizer.Model
             set
             {
                 name = value;
-                NotifyPropertyChanged("Name");
+                NotifyPropertyChanged(nameof(Name));
             }
         }
 
@@ -39,11 +40,12 @@ namespace DLOrganizer.Model
             set
             {
                 ext = value;
-                NotifyPropertyChanged("Ext");
+                NotifyPropertyChanged(nameof(Ext));
             }
         }
 
-        public string Destination {
+        public string Destination
+        {
             get
             {
                 return destination;
@@ -51,7 +53,7 @@ namespace DLOrganizer.Model
             set
             {
                 destination = value;
-                NotifyPropertyChanged("Destination");
+                NotifyPropertyChanged(nameof(Destination));
             }
         }
 
@@ -62,7 +64,7 @@ namespace DLOrganizer.Model
 
         public override string ToString()
         {
-            return string.Format("Name: {0}, Ext: {1}, Dest: {2}", Name, Ext, Destination);
+            return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Ext: {1}, Dest: {2}", Name, Ext, Destination);
         }
     }
 }

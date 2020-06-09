@@ -1,10 +1,10 @@
 ﻿using DLOrganizer.Model;
-using DLOrganizer.Utils;
-using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using static DLOrganizer.Model.LogEvent;
 
 namespace DLOrganizer
 {
@@ -13,77 +13,98 @@ namespace DLOrganizer
         private string _activeDir;
         private List<string> _fileList;
         private List<Config> _configs;
-        private static List<string> _logs;
 
-        public event EventHandler<LogEventArgs> LogChanged;
+        public event EventHandler<LogEvent> LogChanged;
 
         public FileProcessor(List<Config> configs, string srcDir)
         {
             _configs = configs;
             _activeDir = srcDir;
             _fileList = new List<string>();
-            _logs = new List<string>();
+            GetFileList();
         }
 
-        protected virtual void LogAdded(LogEventArgs e)
+        protected virtual void LogAdded(LogEvent e)
         {
             LogChanged?.Invoke(this, e);
         }
 
-        public void processFiles(bool simulate, int sanitize)
+        public List<DLOJob> GenerateJobList(bool simulate, int sanitize)
         {
-            getFileList();
-            sanitizeFilenames(sanitize, simulate);
-            foreach (Config config in _configs) {
-                List<string> files;
-                if (config.Ext.Equals(""))
+            SanitizeFilenames(sanitize, simulate);
+            List<DLOJob> jobs = new List<DLOJob>();
+            foreach (Config config in _configs)
+            {
+                List<string> files = new List<string>();
+                if (string.IsNullOrEmpty(config.Ext))
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name)).ToList();
+                    files.AddRange(_fileList.Where(s => s.Contains(config.Name, StringComparison.OrdinalIgnoreCase)).ToList());
                 }
-                else if (config.Name.Equals(""))
+                else if (string.IsNullOrEmpty(config.Name))
                 {
-                    files = _fileList.Where(s => s.EndsWith(config.Ext)).ToList();
+                    files.AddRange(_fileList.Where(s => s.EndsWith(config.Ext, StringComparison.OrdinalIgnoreCase)).ToList());
                 }
                 else
                 {
-                    files = _fileList.Where(s => s.Contains(config.Name) && s.EndsWith(config.Ext)).ToList();
+                    files.AddRange(_fileList.Where(s => s.Contains(config.Name, StringComparison.OrdinalIgnoreCase) && s.EndsWith(config.Ext, StringComparison.OrdinalIgnoreCase)).ToList());
                 }
                 foreach (string file in files)
                 {
-                    processFile(file, config.Destination, simulate);
+                    jobs.Add(new DLOJob { Source = file , Destination = config.Destination });
                 }
+            }
+            return jobs;
+        }
+
+        public void ProcessFiles(List<DLOJob> jobs, bool simulate)
+        {
+            foreach (DLOJob job in jobs)
+            {
+                ProcessFile(job.Source, job.Destination, simulate);
             }
         }
 
-        private void processFile(string file, string dest, bool simulate)
+        private void ProcessFile(string file, string dest, bool simulate)
         {
             if (dest != null)
             {
-                var args = new LogEventArgs();
                 if (!Directory.Exists(dest))
                 {
                     if (!simulate) Directory.CreateDirectory(dest);
-                    args.LogMessage = "Created directory " + dest;
-                    LogAdded(args);
+                    LogAdded(
+                        new LogEvent
+                        {
+                            Type = EventType.FolderCreate,
+                            Destination = dest,
+                            Success = true
+                        }
+                    );
                 }
                 dest = Path.Combine(dest, Path.GetFileName(file));
-                if (!simulate) FileSystem.MoveFile(file, dest, UIOption.AllDialogs);
-                args.LogMessage = "Moved " + file + " to " + dest + ".";
-                LogAdded(args);
+                if (simulate) Thread.Sleep(500);
+                else File.Move(file, dest); 
+                LogAdded(
+                    new LogEvent
+                    {
+                        Type = EventType.FileMove,
+                        Source = file,
+                        Destination = dest,
+                        Success = true
+                    }
+                );
             }
         }
 
-        private void getFileList()
+        private void GetFileList()
         {
-            _fileList = Directory.GetFiles(_activeDir).ToList<string>();
+            _fileList = Directory.GetFiles(_activeDir).ToList();
         }
 
-        public void sanitizeFilenames(int type, bool simulate)
+        public void SanitizeFilenames(int type, bool simulate)
         {
             for (int i = 0; i < _fileList.Count; i++)
             {
                 string fileName = Path.GetFileName(_fileList[i]);
-                string log = "Renamed " + fileName + " to ";
                 string newName = fileName;
                 switch (type)
                 {
@@ -94,14 +115,19 @@ namespace DLOrganizer
                         newName = fileName.Replace(' ', '_');
                         break;
                 }
-                if (!newName.Equals(fileName))
+                if (!newName.Equals(fileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!simulate) FileSystem.RenameFile(_fileList[i], newName);
+                    if (!simulate) File.Move(_fileList[i], newName);
                     _fileList[i] = Path.GetDirectoryName(_fileList[i]) + @"\" + newName;
-                    log += newName + ".";
-                    var args = new LogEventArgs();
-                    args.LogMessage = log;
-                    LogAdded(args);
+                    LogAdded(
+                        new LogEvent
+                        {
+                            Type = EventType.FileRename,
+                            Source = fileName,
+                            Destination = newName,
+                            Success = true
+                        }
+                    );
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿using DLOrganizer.Commands;
+using DLOrganizer.Model;
 using DLOrganizer.Properties;
 using DLOrganizer.ViewModels;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace DLOrganizer
     /// </summary>
     public partial class MainWindow
     {
-        private const string VERSION = "v2.0.0";
+        private const string VERSION = "v2.0.1";
         private const string configFile = "config.json";
 
         private MainViewModel mainViewModel;
@@ -20,10 +21,7 @@ namespace DLOrganizer
 
         private ActionCommand<int> navCommand;
 
-        public List<NavButton> MainButtons
-        {
-            get; set;
-        }
+        public List<NavButton> MainButtons { get; private set; }
 
         public ICommand NavigateCommand
         {
@@ -31,7 +29,7 @@ namespace DLOrganizer
             {
                 if (navCommand == null)
                 {
-                    navCommand = new ActionCommand<int>(this.ChangePage, this.CanNavigate);
+                    navCommand = new ActionCommand<int>(ChangePage, CanNavigate);
                 }
                 return navCommand;
             }
@@ -58,7 +56,7 @@ namespace DLOrganizer
             mainViewModel = new MainViewModel();
             configViewModel = new ConfigViewModel(configFile);
             aboutViewModel = new AboutViewModel(VERSION);
-            
+
             ChangePage(0);
         }
 
@@ -86,34 +84,9 @@ namespace DLOrganizer
             }
         }
 
-        public bool CanNavigate()
+        public static bool CanNavigate()
         {
             return true;
-        }
-
-        public class NavButton
-        {
-            public string Label
-            {
-                get;set;
-            }
-
-            public ICommand Command
-            {
-                get;set;
-            }
-
-            public int PageNumber
-            {
-                get;set;
-            }
-
-            public NavButton(string label, ICommand command, int page)
-            {
-                Label = label;
-                Command = command;
-                PageNumber = page;
-            }
         }
     }
 }

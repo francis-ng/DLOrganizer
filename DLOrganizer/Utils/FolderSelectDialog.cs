@@ -1,154 +1,142 @@
-﻿using System;
-using System.Windows.Forms;
+﻿// Reference from https://qiita.com/otagaisama-1/items/b0804b9d6d37d82950f7
 
-// ------------------------------------------------------------------
-// Wraps System.Windows.Forms.OpenFileDialog to make it present
-// a vista-style dialog.
-// ------------------------------------------------------------------
+using System;
+using System.Runtime.InteropServices;
 
 namespace FolderSelect
 {
-	/// <summary>
-	/// Wraps System.Windows.Forms.OpenFileDialog to make it present
-	/// a vista-style dialog.
-	/// </summary>
-	public class FolderSelectDialog
-	{
-		// Wrapped dialog
-		System.Windows.Forms.OpenFileDialog ofd = null;
+    public class FolderSelectDialog
+    {
+        public string Path { get; set; }
+        public string Title { get; set; }
 
-		/// <summary>
-		/// Default constructor
-		/// </summary>
-		public FolderSelectDialog()
-		{
-			ofd = new System.Windows.Forms.OpenFileDialog();
+        public System.Windows.Forms.DialogResult ShowDialog()
+        {
+            return ShowDialog(IntPtr.Zero);
+        }
 
-			ofd.Filter = "Folders|\n";
-			ofd.AddExtension = false;
-			ofd.CheckFileExists = false;
-			ofd.DereferenceLinks = true;
-			ofd.Multiselect = false;
-		}
+        public System.Windows.Forms.DialogResult ShowDialog(System.Windows.Forms.IWin32Window owner)
+        {
+            return ShowDialog(owner.Handle);
+        }
 
-		#region Properties
+        public System.Windows.Forms.DialogResult ShowDialog(IntPtr owner)
+        {
+            var dlg = new FileOpenDialogInternal() as IFileOpenDialog;
+            try
+            {
+                dlg.SetOptions(FOS.FOS_PICKFOLDERS | FOS.FOS_FORCEFILESYSTEM);
 
-		/// <summary>
-		/// Gets/Sets the initial folder to be selected. A null value selects the current directory.
-		/// </summary>
-		public string InitialDirectory
-		{
-			get { return ofd.InitialDirectory; }
-			set { ofd.InitialDirectory = value == null || value.Length == 0 ? Environment.CurrentDirectory : value; }
-		}
+                IShellItem item;
+                if (!string.IsNullOrEmpty(this.Path))
+                {
+                    IntPtr idl;
+                    uint atts = 0;
+                    if (NativeMethods.SHILCreateFromPath(this.Path, out idl, ref atts) == 0)
+                    {
+                        if (NativeMethods.SHCreateShellItem(IntPtr.Zero, IntPtr.Zero, idl, out item) == 0)
+                        {
+                            dlg.SetFolder(item);
+                        }
+                    }
+                }
 
-		/// <summary>
-		/// Gets/Sets the title to show in the dialog
-		/// </summary>
-		public string Title
-		{
-			get { return ofd.Title; }
-			set { ofd.Title = value == null ? "Select a folder" : value; }
-		}
+                if (!string.IsNullOrEmpty(this.Title))
+                    dlg.SetTitle(this.Title);
 
-		/// <summary>
-		/// Gets the selected folder
-		/// </summary>
-		public string FileName
-		{
-			get { return ofd.FileName; }
-		}
+                var hr = dlg.Show(owner);
+                if (hr.Equals(NativeMethods.ERROR_CANCELLED))
+                    return System.Windows.Forms.DialogResult.Cancel;
+                if (!hr.Equals(0))
+                    return System.Windows.Forms.DialogResult.Abort;
 
-		#endregion
+                dlg.GetResult(out item);
+                string outputPath;
+                item.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out outputPath);
+                this.Path = outputPath;
 
-		#region Methods
+                return System.Windows.Forms.DialogResult.OK;
+            }
+            finally
+            {
+                Marshal.FinalReleaseComObject(dlg);
+            }
+        }
 
-		/// <summary>
-		/// Shows the dialog
-		/// </summary>
-		/// <returns>True if the user presses OK else false</returns>
-		public bool ShowDialog()
-		{
-			return ShowDialog(IntPtr.Zero);
-		}
+        [ComImport]
+        [Guid("DC1C5A9C-E88A-4dde-A5A1-60F82A20AEF7")]
+        private class FileOpenDialogInternal
+        {
+        }
 
-		/// <summary>
-		/// Shows the dialog
-		/// </summary>
-		/// <param name="hWndOwner">Handle of the control to be parent</param>
-		/// <returns>True if the user presses OK else false</returns>
-		public bool ShowDialog(IntPtr hWndOwner)
-		{
-			bool flag = false;
+        // not fully defined と記載された宣言は、支障ない範囲で端折ってあります。
+        [ComImport]
+        [Guid("42f85136-db7e-439c-85f1-e4075d135fc8")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IFileOpenDialog
+        {
+            [PreserveSig]
+            UInt32 Show([In] IntPtr hwndParent);
+            void SetFileTypes();     // not fully defined
+            void SetFileTypeIndex();     // not fully defined
+            void GetFileTypeIndex();     // not fully defined
+            void Advise(); // not fully defined
+            void Unadvise();
+            void SetOptions([In] FOS fos);
+            void GetOptions(); // not fully defined
+            void SetDefaultFolder(); // not fully defined
+            void SetFolder(IShellItem psi);
+            void GetFolder(); // not fully defined
+            void GetCurrentSelection(); // not fully defined
+            void SetFileName();  // not fully defined
+            void GetFileName();  // not fully defined
+            void SetTitle([In, MarshalAs(UnmanagedType.LPWStr)] string pszTitle);
+            void SetOkButtonLabel(); // not fully defined
+            void SetFileNameLabel(); // not fully defined
+            void GetResult(out IShellItem ppsi);
+            void AddPlace(); // not fully defined
+            void SetDefaultExtension(); // not fully defined
+            void Close(); // not fully defined
+            void SetClientGuid();  // not fully defined
+            void ClearClientData();
+            void SetFilter(); // not fully defined
+            void GetResults(); // not fully defined
+            void GetSelectedItems(); // not fully defined
+        }
 
-			if (Environment.OSVersion.Version.Major >= 6)
-			{
-				var r = new Reflector("System.Windows.Forms");
+        [ComImport]
+        [Guid("43826D1E-E718-42EE-BC55-A1E261C37BFE")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IShellItem
+        {
+            void BindToHandler(); // not fully defined
+            void GetParent(); // not fully defined
+            void GetDisplayName([In] SIGDN sigdnName, [MarshalAs(UnmanagedType.LPWStr)] out string ppszName);
+            void GetAttributes();  // not fully defined
+            void Compare();  // not fully defined
+        }
 
-				uint num = 0;
-				Type typeIFileDialog = r.GetType("FileDialogNative.IFileDialog");
-				object dialog = r.Call(ofd, "CreateVistaDialog");
-				r.Call(ofd, "OnBeforeVistaDialog", dialog);
+        private enum SIGDN : uint // not fully defined
+        {
+            SIGDN_FILESYSPATH = 0x80058000,
+        }
 
-				uint options = (uint)r.CallAs(typeof(System.Windows.Forms.FileDialog), ofd, "GetOptions");
-				options |= (uint)r.GetEnum("FileDialogNative.FOS", "FOS_PICKFOLDERS");
-				r.CallAs(typeIFileDialog, dialog, "SetOptions", options);
+        [Flags]
+        private enum FOS // not fully defined
+        {
+            FOS_FORCEFILESYSTEM = 0x40,
+            FOS_PICKFOLDERS = 0x20,
+        }
 
-				object pfde = r.New("FileDialog.VistaDialogEvents", ofd);
-				object[] parameters = new object[] { pfde, num };
-				r.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
-				num = (uint)parameters[1];
-				try
-				{
-					int num2 = (int)r.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
-					flag = 0 == num2;
-				}
-				finally
-				{
-					r.CallAs(typeIFileDialog, dialog, "Unadvise", num);
-					GC.KeepAlive(pfde);
-				}
-			}
-			else
-			{
-				var fbd = new FolderBrowserDialog();
-				fbd.Description = this.Title;
-				fbd.SelectedPath = this.InitialDirectory;
-				fbd.ShowNewFolderButton = false;
-				if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
-				ofd.FileName = fbd.SelectedPath;
-				flag = true;
-			}
+        private class NativeMethods
+        {
+            [DllImport("shell32.dll")]
+            public static extern int SHILCreateFromPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath, out IntPtr ppIdl, ref uint rgflnOut);
 
-			return flag;
-		}
+            [DllImport("shell32.dll")]
+            public static extern int SHCreateShellItem(IntPtr pidlParent, IntPtr psfParent, IntPtr pidl, out IShellItem ppsi);
 
-		#endregion
-	}
-
-	/// <summary>
-	/// Creates IWin32Window around an IntPtr
-	/// </summary>
-	public class WindowWrapper : System.Windows.Forms.IWin32Window
-	{
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="handle">Handle to wrap</param>
-		public WindowWrapper(IntPtr handle)
-		{
-			_hwnd = handle;
-		}
-
-		/// <summary>
-		/// Original ptr
-		/// </summary>
-		public IntPtr Handle
-		{
-			get { return _hwnd; }
-		}
-
-		private IntPtr _hwnd;
-	}
-
+            public const uint ERROR_CANCELLED = 0x800704C7;
+        }
+    }
 }

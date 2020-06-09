@@ -2,12 +2,12 @@
 using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
 using DLOrganizer.Properties;
-using DLOrganizer.Utils;
 using FolderSelect;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
@@ -20,6 +20,7 @@ namespace DLOrganizer.ViewModels
         private ActionCommand<bool> browseCommand;
         private ActionCommand<bool> clearLogCommand;
         private string sourceFolder, logContents;
+        private int totalFiles, filesCompleted;
 
         #region Properties
         public string SourceFolder
@@ -31,7 +32,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 sourceFolder = value;
-                NotifyPropertyChanged("SourceFolder");
+                NotifyPropertyChanged(nameof(SourceFolder));
             }
         }
 
@@ -44,7 +45,33 @@ namespace DLOrganizer.ViewModels
             set
             {
                 logContents = value;
-                NotifyPropertyChanged("LogContents");
+                NotifyPropertyChanged(nameof(LogContents));
+            }
+        }
+
+        public int TotalFiles
+        {
+            get
+            {
+                return totalFiles;
+            }
+            set
+            {
+                totalFiles = value;
+                NotifyPropertyChanged(nameof(TotalFiles));
+            }
+        }
+
+        public int FilesCompleted
+        {
+            get
+            {
+                return filesCompleted;
+            }
+            set
+            {
+                filesCompleted = value;
+                NotifyPropertyChanged(nameof(FilesCompleted));
             }
         }
 
@@ -64,7 +91,7 @@ namespace DLOrganizer.ViewModels
             {
                 if (processCommand == null)
                 {
-                    processCommand = new ActionCommand<bool>(this.Process, this.CanProcess);
+                    processCommand = new ActionCommand<bool>(Process, CanProcess);
                 }
                 return processCommand;
             }
@@ -76,7 +103,7 @@ namespace DLOrganizer.ViewModels
             {
                 if (browseCommand == null)
                 {
-                    browseCommand = new ActionCommand<bool>(this.Browse, this.CanBrowse);
+                    browseCommand = new ActionCommand<bool>(Browse, CanBrowse);
                 }
                 return browseCommand;
             }
@@ -88,7 +115,7 @@ namespace DLOrganizer.ViewModels
             {
                 if (clearLogCommand == null)
                 {
-                    clearLogCommand = new ActionCommand<bool>(this.ClearLog, this.CanClearLog);
+                    clearLogCommand = new ActionCommand<bool>(ClearLog, CanClearLog);
                 }
                 return clearLogCommand;
             }
@@ -109,6 +136,8 @@ namespace DLOrganizer.ViewModels
             SanitizeTypes.Add(new SanitizeType(@"Don't standardize filenames", 0));
             SanitizeTypes.Add(new SanitizeType(@"Change '_' to ' '", 0));
             SanitizeTypes.Add(new SanitizeType(@"Change ' ' to '_'", 0));
+            TotalFiles = 0;
+            FilesCompleted = 0;
         }
 
         private void NotifyPropertyChanged(string propertyName)
@@ -122,24 +151,32 @@ namespace DLOrganizer.ViewModels
             try
             {
                 var fp = new FileProcessor(ConfigManager.Configs, SourceFolder);
-                fp.LogChanged += new EventHandler<LogEventArgs>(LogUpdated);
-                var oThread = new Thread(() => fp.processFiles(Simulate, SelectedSanitize));
-                oThread.Start();
+                var jobList = fp.GenerateJobList(Simulate, SelectedSanitize);
+                TotalFiles = jobList.Count;
+                fp.LogChanged += new EventHandler<LogEvent>(LogUpdated);
+                Task.Factory.StartNew(() => fp.ProcessFiles(jobList, Simulate));
             }
             catch (Exception ex)
             {
                 AddToLog(ex.Message);
+                throw;
             }
         }
 
         private void Browse(bool dummy)
         {
             var fldrDialog = new FolderSelectDialog();
-            fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
-            fldrDialog.ShowDialog();
-            if (fldrDialog.FileName != "")
+            if (string.IsNullOrWhiteSpace(SourceFolder))
             {
-                SourceFolder = fldrDialog.FileName;
+                fldrDialog.Path = Settings.Default.DefaultSource;
+            }
+            else
+            {
+                fldrDialog.Path = SourceFolder;
+            }
+            if (fldrDialog.ShowDialog() == DialogResult.OK && string.IsNullOrWhiteSpace(fldrDialog.Path))
+            {
+                SourceFolder = fldrDialog.Path;
             }
         }
 
@@ -155,8 +192,12 @@ namespace DLOrganizer.ViewModels
             LogContents += message + "\n";
         }
 
-        private void LogUpdated(object sender, LogEventArgs e)
+        private void LogUpdated(object sender, LogEvent e)
         {
+            if (e.Type == LogEvent.EventType.FileMove && e.Success)
+            {
+                FilesCompleted = filesCompleted + 1;
+            }
             AddToLog(e.LogMessage);
         }
         #endregion

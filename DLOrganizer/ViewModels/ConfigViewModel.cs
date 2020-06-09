@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace DLOrganizer.ViewModels
@@ -26,10 +27,7 @@ namespace DLOrganizer.ViewModels
         private bool nameFocused;
 
         #region Properties
-        public ObservableCollection<Config> List_Configs
-        {
-            get; set;
-        }
+        public ObservableCollection<Config> ListConfigs { get; set; }
 
         public string BrowseDeleteButtonContent
         {
@@ -40,7 +38,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 _browseDeleteString = value;
-                NotifyPropertyChanged("BrowseDeleteButtonContent");
+                NotifyPropertyChanged(nameof(BrowseDeleteButtonContent));
             }
         }
 
@@ -53,7 +51,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 _addUpdateString = value;
-                NotifyPropertyChanged("AddUpdateButtonContent");
+                NotifyPropertyChanged(nameof(AddUpdateButtonContent));
             }
         }
 
@@ -66,7 +64,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 _configName = value;
-                NotifyPropertyChanged("ConfigName");
+                NotifyPropertyChanged(nameof(ConfigName));
             }
         }
 
@@ -79,7 +77,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 _extension = value;
-                NotifyPropertyChanged("Extension");
+                NotifyPropertyChanged(nameof(Extension));
             }
         }
 
@@ -92,7 +90,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 _destination = value;
-                NotifyPropertyChanged("Destination");
+                NotifyPropertyChanged(nameof(Destination));
             }
         }
 
@@ -113,7 +111,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 nameFocused = value;
-                NotifyPropertyChanged("NameIsFocused");
+                NotifyPropertyChanged(nameof(NameIsFocused));
             }
         }
 
@@ -130,7 +128,7 @@ namespace DLOrganizer.ViewModels
                     selectedConfig = value;
                     ConfigSelectionChanged();
                 }
-                NotifyPropertyChanged("SelectedConfig");
+                NotifyPropertyChanged(nameof(SelectedConfig));
             }
         }
 
@@ -190,7 +188,7 @@ namespace DLOrganizer.ViewModels
             if (!AnyConfigsSelected)
             {
                 var config = new Config(ConfigName, Extension, Destination);
-                List_Configs.Add(config);
+                ListConfigs.Add(config);
                 ClearConfigText();
                 RefocusNameField();
             }
@@ -212,25 +210,31 @@ namespace DLOrganizer.ViewModels
             if (!AnyConfigsSelected)
             {
                 var fldrDialog = new FolderSelectDialog();
-                fldrDialog.InitialDirectory = Settings.Default.DefaultSource;
-                fldrDialog.ShowDialog();
-                if (fldrDialog.FileName != "")
+                if (string.IsNullOrWhiteSpace(Destination))
                 {
-                    Destination = fldrDialog.FileName;
+                    fldrDialog.Path = Settings.Default.DefaultSource;
+                }
+                else
+                {
+                    fldrDialog.Path = Destination;
+                }
+                if (fldrDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fldrDialog.Path))
+                {
+                    Destination = fldrDialog.Path;
                 }
             }
             else
             // Delete
             {
-                int index = List_Configs.IndexOf(SelectedConfig);
-                if (List_Configs.Count - 1 == index)
+                int index = ListConfigs.IndexOf(SelectedConfig);
+                if (ListConfigs.Count - 1 == index)
                 {
                     index--;
                 }
-                List_Configs.Remove(SelectedConfig);
+                ListConfigs.Remove(SelectedConfig);
                 if (index > 0)
                 {
-                    SelectedConfig = List_Configs[index];
+                    SelectedConfig = ListConfigs[index];
                 }
             }
         }
@@ -245,19 +249,19 @@ namespace DLOrganizer.ViewModels
         #endregion
 
         #region Helper Functions
-        public void SaveConfigs()
+        public async void SaveConfigs()
         {
             try
             {
-                ConfigManager.SaveConfigs(new List<Config>(List_Configs), configFile);
+                await ConfigManager.SaveConfigs(new List<Config>(ListConfigs), configFile).ConfigureAwait(true);
             }
-            catch (IOException ex)
+            catch (IOException)
             {
-                string warnText = @"Error when saving configuration file. Your current configuration has not been saved. Click Yes to try again, or No to continue without saving.";
-                string caption = "Configuration Save Error";
+                string warnText = Strings.WarnSaveConfigFailed;
+                string caption = Strings.CaptionConfigSaveError;
                 MessageBoxButton buttons = MessageBoxButton.YesNo;
                 MessageBoxImage icon = MessageBoxImage.Warning;
-                MessageBoxResult result = MessageBox.Show(warnText, caption, buttons, icon);
+                MessageBoxResult result = System.Windows.MessageBox.Show(warnText, caption, buttons, icon);
                 switch (result)
                 {
                     case MessageBoxResult.Yes:
@@ -274,22 +278,22 @@ namespace DLOrganizer.ViewModels
             try
             {
                 ConfigManager.LoadConfigs(configFile);
-                List_Configs = new ObservableCollection<Config>(ConfigManager.Configs);
+                ListConfigs = new ObservableCollection<Config>(ConfigManager.Configs);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                string warnText = @"Error reading configuration file. Click OK to start with a fresh file, or Cancel to exit.";
-                string caption = "Configuration Load Error";
+                string warnText = Strings.WarnLoadConfigFailed;
+                string caption = Strings.CaptionConfigLoadError;
                 MessageBoxButton buttons = MessageBoxButton.OKCancel;
                 MessageBoxImage icon = MessageBoxImage.Warning;
-                MessageBoxResult result = MessageBox.Show(warnText, caption, buttons, icon);
+                MessageBoxResult result = System.Windows.MessageBox.Show(warnText, caption, buttons, icon);
                 switch (result)
                 {
                     case MessageBoxResult.OK:
-                        List_Configs = new ObservableCollection<Config>();
+                        ListConfigs = new ObservableCollection<Config>();
                         break;
                     case MessageBoxResult.Cancel:
-                        Application.Current.Shutdown();
+                        System.Windows.Application.Current.Shutdown();
                         break;
                 }
             }
