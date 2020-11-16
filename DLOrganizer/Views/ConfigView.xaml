@@ -11,6 +11,11 @@
         <KeyBinding Key="Return" Command="{Binding AddUpdateCommand}" CommandParameter="{Binding AnyConfigsSelected}" />
     </UserControl.InputBindings>
     <Grid Margin="10">
+        <Grid.Resources>
+            <Style TargetType="Label">
+                <Setter Property="Foreground" Value="GhostWhite" />
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="3*" />

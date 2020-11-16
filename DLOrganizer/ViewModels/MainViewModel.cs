@@ -2,7 +2,6 @@
 using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
 using DLOrganizer.Properties;
-using FolderSelect;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -154,7 +153,7 @@ namespace DLOrganizer.ViewModels
                 var jobList = fp.GenerateJobList(Simulate, SelectedSanitize);
                 TotalFiles = jobList.Count;
                 fp.LogChanged += new EventHandler<LogEvent>(LogUpdated);
-                Task.Factory.StartNew(() => fp.ProcessFiles(jobList, Simulate));
+                Task.Run(() => fp.ProcessFiles(jobList, Simulate));
             }
             catch (Exception ex)
             {
@@ -165,18 +164,20 @@ namespace DLOrganizer.ViewModels
 
         private void Browse(bool dummy)
         {
-            var fldrDialog = new FolderSelectDialog();
-            if (string.IsNullOrWhiteSpace(SourceFolder))
-            {
-                fldrDialog.Path = Settings.Default.DefaultSource;
-            }
-            else
-            {
-                fldrDialog.Path = SourceFolder;
-            }
-            if (fldrDialog.ShowDialog() == DialogResult.OK && string.IsNullOrWhiteSpace(fldrDialog.Path))
-            {
-                SourceFolder = fldrDialog.Path;
+            using (var fldrDialog = new FolderBrowserDialog()) {
+                fldrDialog.RootFolder = Environment.SpecialFolder.MyComputer;
+                if (string.IsNullOrWhiteSpace(SourceFolder))
+                {
+                    fldrDialog.SelectedPath = Settings.Default.DefaultSource;
+                }
+                else
+                {
+                    fldrDialog.SelectedPath = SourceFolder;
+                }
+                if (fldrDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fldrDialog.SelectedPath))
+                {
+                    SourceFolder = fldrDialog.SelectedPath;
+                }
             }
         }
 

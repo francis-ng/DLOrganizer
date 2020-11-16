@@ -2,7 +2,6 @@
 using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
 using DLOrganizer.Properties;
-using FolderSelect;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -209,18 +208,21 @@ namespace DLOrganizer.ViewModels
             // Browse
             if (!AnyConfigsSelected)
             {
-                var fldrDialog = new FolderSelectDialog();
-                if (string.IsNullOrWhiteSpace(Destination))
+                using (var fldrDialog = new FolderBrowserDialog())
                 {
-                    fldrDialog.Path = Settings.Default.DefaultSource;
-                }
-                else
-                {
-                    fldrDialog.Path = Destination;
-                }
-                if (fldrDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fldrDialog.Path))
-                {
-                    Destination = fldrDialog.Path;
+                    fldrDialog.RootFolder = Environment.SpecialFolder.MyComputer;
+                    if (string.IsNullOrWhiteSpace(Destination))
+                    {
+                        fldrDialog.SelectedPath = Settings.Default.DefaultSource;
+                    }
+                    else
+                    {
+                        fldrDialog.SelectedPath = Destination;
+                    }
+                    if (fldrDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fldrDialog.SelectedPath))
+                    {
+                        Destination = fldrDialog.SelectedPath;
+                    }
                 }
             }
             else
