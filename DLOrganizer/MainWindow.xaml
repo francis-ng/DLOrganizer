@@ -1,45 +1,33 @@
-﻿<fw:AcrylicWindow x:Class="DLOrganizer.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		xmlns:local="clr-namespace:DLOrganizer"
-        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
-        xmlns:viewmodels="clr-namespace:DLOrganizer.ViewModels"
-        xmlns:views="clr-namespace:DLOrganizer.Views"
-        Title="DL Organizer" Width="1024" Height="480" 
-        ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterScreen"
-        fw:PointerTracker.Enabled="True" >
-    <Window.Resources>
-        <DataTemplate x:Name="mainViewTemplate" DataType="{x:Type viewmodels:MainViewModel}">
-            <views:MainView DataContext="{Binding}" Focusable="True" />
-        </DataTemplate>
-        <DataTemplate x:Name="configViewTemplate" DataType="{x:Type viewmodels:ConfigViewModel}">
-            <views:ConfigView DataContext="{Binding}" Focusable="True" />
-        </DataTemplate>
-        <DataTemplate x:Name="aboutViewTemplate" DataType="{x:Type viewmodels:AboutViewModel}">
-            <views:AboutView DataContext="{Binding}" Focusable="True" />
-        </DataTemplate>
-        <local:MainWindow x:Key="windowobj" />
-    </Window.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Background="#777">
-            <ItemsControl Name="MenuItems">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Content="{Binding Label}" Command="{Binding Path=Command}" CommandParameter="{Binding PageNumber}" 
-                                Style="{StaticResource ButtonRevealStyle}" MinHeight="40"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-        <ContentControl Grid.Row="0" Grid.Column="1" Content="{Binding}" />
-    </Grid>
-</fw:AcrylicWindow>
+﻿<Window
+    x:Class="DLOrganizer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:DLOrganizer"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <NavigationView
+        xmlns:viewmodel="using:DLOrganizer.ViewModels"
+        xmlns:views="using:DLOrganizer.Views"
+        Grid.Row="1"
+        IsSettingsVisible="False"
+        PaneDisplayMode="Auto"
+        SelectionChanged="NavigationView_SelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem
+                Content="Process"
+                Icon="Play"
+                Tag="MainView" />
+            <NavigationViewItem
+                Content="Configuration"
+                Icon="Setting"
+                Tag="ConfigView" />
+            <NavigationViewItem
+                Content="About"
+                Icon="Help"
+                Tag="AboutView" />
+        </NavigationView.MenuItems>
+        <Frame x:Name="content" />
+    </NavigationView>
+</Window>

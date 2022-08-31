@@ -1,21 +1,10 @@
-﻿<UserControl x:Class="DLOrganizer.Views.MainView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:DLOrganizer.Views"
-             xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="960">
-    <UserControl.InputBindings>
-        <KeyBinding Key="Return" Command="{Binding Process}" CommandParameter="{Binding Simulate}" />
-    </UserControl.InputBindings>
+﻿<Page
+    x:Class="DLOrganizer.Views.MainView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
     <Grid Margin="15,10">
-        <Grid.Resources>
-            <Style TargetType="Label">
-                <Setter Property="Foreground" Value="GhostWhite" />
-            </Style>
-        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*" />
             <ColumnDefinition Width="*" />
@@ -31,19 +20,100 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Label Content="Scan Directory" Grid.Row="0" Grid.Column="0" FontWeight="Bold" />
-        <TextBox MinHeight="30" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
-                 Text="{Binding SourceFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBoxRevealStyle}"/>
-        <Button Command="{Binding BrowseCommand}" CommandParameter="{Binding Simulate}" Content="Browse" MinHeight="30" Grid.Row="1" Grid.Column="1" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
-        <Button Command="{Binding ProcessCommand}" CommandParameter="{Binding Simulate}" Content="Process" MinHeight="30" Grid.Row="1" Grid.Column="2" Margin="5,0" Style="{StaticResource ButtonRevealStyle}" />
-        <ComboBox Grid.Row="2" Grid.Column="0" MinHeight="30" Margin="0,5,5,5" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Background="{fw:AcrylicBrush}"
-                  ItemsSource="{Binding SanitizeTypes}" SelectedValue="{Binding SelectedSanitize, Mode=TwoWay}" DisplayMemberPath="Name" SelectedValuePath="Value" />
-        <CheckBox IsChecked="{Binding Path=Simulate}" Content="Simulate" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5" Foreground="GhostWhite" />
-        <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="30" Maximum="{Binding TotalFiles}" Value="{Binding FilesCompleted}" />
-        <Label Content="Log" Grid.Row="4" Grid.Column="0" FontWeight="Bold" Margin="0,10,0,0" />
-        <TextBox Text="{Binding LogContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" IsReadOnly="True" 
-                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TextBoxRevealStyle}"/>
-        <Button Command="{Binding ClearLogCommand}" CommandParameter="{Binding Simulate}" Content="Clear Log" MinHeight="30"
-                Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,0" VerticalAlignment="Top" Style="{StaticResource ButtonRevealStyle}" />
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            FontWeight="Bold"
+            Text="Scan Directory" />
+        <TextBox
+            Grid.Row="1"
+            Grid.Column="0"
+            MinHeight="30"
+            Margin="0,0,5,0"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Center"
+            AccessKey="D"
+            Text="{x:Bind viewmodel.SourceFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <Button
+            Grid.Row="1"
+            Grid.Column="1"
+            MinHeight="30"
+            Margin="5,0"
+            HorizontalAlignment="Stretch"
+            Command="{x:Bind viewmodel.BrowseCommand}"
+            CommandParameter="{x:Bind viewmodel.Simulate, Mode=OneWay}"
+            Content="Browse"
+            ToolTipService.ToolTip="Ctrl + B">
+            <Button.KeyboardAccelerators>
+                <KeyboardAccelerator Key="B" Modifiers="Control" />
+            </Button.KeyboardAccelerators>
+        </Button>
+        <Button
+            Grid.Row="1"
+            Grid.Column="2"
+            MinHeight="30"
+            Margin="5,0"
+            HorizontalAlignment="Stretch"
+            Command="{x:Bind viewmodel.ProcessCommand, Mode=OneWay}"
+            CommandParameter="{x:Bind viewmodel.Simulate, Mode=OneWay}"
+            Content="Process"
+            ToolTipService.ToolTip="Ctrl + P">
+            <Button.KeyboardAccelerators>
+                <KeyboardAccelerator Key="P" Modifiers="Control" />
+            </Button.KeyboardAccelerators>
+        </Button>
+        <ComboBox
+            Grid.Row="2"
+            Grid.Column="0"
+            MinHeight="30"
+            Margin="0,5,5,5"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Center"
+            AccessKey="H"
+            DisplayMemberPath="Name"
+            ItemsSource="{x:Bind viewmodel.SanitizeTypes, Mode=OneWay}"
+            SelectedValue="{x:Bind viewmodel.SelectedSanitize, Mode=TwoWay}"
+            SelectedValuePath="Value" />
+        <CheckBox
+            Grid.Row="2"
+            Grid.Column="2"
+            Margin="0,5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            AccessKey="S"
+            Content="Simulate"
+            IsChecked="{x:Bind viewmodel.Simulate, Mode=TwoWay}" />
+        <ProgressBar
+            Grid.Row="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            MinHeight="30"
+            Maximum="{x:Bind viewmodel.TotalFiles, Mode=TwoWay}"
+            Value="{x:Bind viewmodel.FilesCompleted, Mode=TwoWay}" />
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="0"
+            Margin="0,10,0,0"
+            FontWeight="Bold"
+            Text="Log" />
+        <TextBox
+            Grid.Row="5"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            AutomationProperties.Name="multi-line TextBox"
+            IsReadOnly="True"
+            Text="{x:Bind viewmodel.LogContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            TextWrapping="Wrap" />
+        <Button
+            Grid.Row="6"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            MinHeight="30"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Command="{x:Bind viewmodel.ClearLogCommand, Mode=OneWay}"
+            CommandParameter="{x:Bind viewmodel.Simulate, Mode=OneWay}"
+            Content="Clear Log" />
     </Grid>
-</UserControl>
+</Page>

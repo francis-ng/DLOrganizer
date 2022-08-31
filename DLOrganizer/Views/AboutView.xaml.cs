@@ -1,11 +1,11 @@
-﻿using System.Windows.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 
 namespace DLOrganizer.Views
 {
     /// <summary>
     /// Interaction logic for AboutView.xaml
     /// </summary>
-    public partial class AboutView : UserControl
+    public partial class AboutView : Page
     {
         public AboutView()
         {

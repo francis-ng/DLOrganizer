@@ -1,15 +1,16 @@
 ﻿using DLOrganizer.Commands;
 using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
-using DLOrganizer.Properties;
+using DLOrganizer.Utils;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Input;
+using Windows.Storage.Pickers;
 
 namespace DLOrganizer.ViewModels
 {
@@ -17,7 +18,6 @@ namespace DLOrganizer.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private string configFile;
         private string _configName, _extension, _destination, _browseDeleteString, _addUpdateString;
         private ActionCommand<bool> browseDeleteCommand;
         private ActionCommand<bool> addUpdateCommand;
@@ -126,8 +126,8 @@ namespace DLOrganizer.ViewModels
                 {
                     selectedConfig = value;
                     ConfigSelectionChanged();
+                    NotifyPropertyChanged(nameof(SelectedConfig));
                 }
-                NotifyPropertyChanged(nameof(SelectedConfig));
             }
         }
 
@@ -168,9 +168,8 @@ namespace DLOrganizer.ViewModels
         }
         #endregion
 
-        public ConfigViewModel(string configFile)
+        public ConfigViewModel()
         {
-            this.configFile = configFile;
             SetBrowseAddMode();
             LoadConfigs();
         }
@@ -200,29 +199,26 @@ namespace DLOrganizer.ViewModels
                 ClearConfigSelection();
                 ClearConfigText();
                 RefocusNameField();
+                NotifyPropertyChanged(nameof(SelectedConfig));
             }
+            SaveConfigs();
         }
 
-        private void BrowseOrDelete(bool configsSelected)
+        private async void BrowseOrDelete(bool configsSelected)
         {
             // Browse
             if (!AnyConfigsSelected)
             {
-                using (var fldrDialog = new FolderBrowserDialog())
+                var folderPicker = new FolderPicker();
+                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle((Application.Current as App).Window);
+                WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+
+                folderPicker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+                folderPicker.FileTypeFilter.Add("*");
+                var folder = await folderPicker.PickSingleFolderAsync();
+                if (folder != null)
                 {
-                    fldrDialog.RootFolder = Environment.SpecialFolder.MyComputer;
-                    if (string.IsNullOrWhiteSpace(Destination))
-                    {
-                        fldrDialog.SelectedPath = Settings.Default.DefaultSource;
-                    }
-                    else
-                    {
-                        fldrDialog.SelectedPath = Destination;
-                    }
-                    if (fldrDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fldrDialog.SelectedPath))
-                    {
-                        Destination = fldrDialog.SelectedPath;
-                    }
+                    Destination = folder.Path;
                 }
             }
             else
@@ -239,6 +235,7 @@ namespace DLOrganizer.ViewModels
                     SelectedConfig = ListConfigs[index];
                 }
             }
+            SaveConfigs();
         }
 
         private void NewConfig(bool dummy)
@@ -255,48 +252,58 @@ namespace DLOrganizer.ViewModels
         {
             try
             {
-                await ConfigManager.SaveConfigs(new List<Config>(ListConfigs), configFile).ConfigureAwait(true);
+                await ConfigManager.SaveConfigs(new List<Config>(ListConfigs), SettingsManager.Settings.ConfigFile).ConfigureAwait(true);
             }
             catch (IOException)
             {
-                string warnText = Strings.WarnSaveConfigFailed;
-                string caption = Strings.CaptionConfigSaveError;
-                MessageBoxButton buttons = MessageBoxButton.YesNo;
-                MessageBoxImage icon = MessageBoxImage.Warning;
-                MessageBoxResult result = System.Windows.MessageBox.Show(warnText, caption, buttons, icon);
-                switch (result)
+                ContentDialog dialog = new ContentDialog();
+
+                string warnText = Application.Current.Resources["WarnSaveConfigFailed"] as string;
+                string caption = Application.Current.Resources["CaptionConfigSaveError"] as string;
+
+                dialog.Title = caption;
+                dialog.Content = warnText;
+                dialog.PrimaryButtonText = Application.Current.Resources["Yes"] as string;
+                dialog.CloseButtonText = Application.Current.Resources["No"] as string;
+                dialog.IsSecondaryButtonEnabled = false;
+                dialog.DefaultButton = ContentDialogButton.Primary;
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
                 {
-                    case MessageBoxResult.Yes:
-                        SaveConfigs();
-                        break;
-                    case MessageBoxResult.No:
-                        break;
+                    SaveConfigs();
                 }
             }
         }
 
-        public void LoadConfigs()
+        public async void LoadConfigs()
         {
             try
             {
-                ConfigManager.LoadConfigs(configFile);
                 ListConfigs = new ObservableCollection<Config>(ConfigManager.Configs);
             }
             catch (InvalidOperationException)
             {
-                string warnText = Strings.WarnLoadConfigFailed;
-                string caption = Strings.CaptionConfigLoadError;
-                MessageBoxButton buttons = MessageBoxButton.OKCancel;
-                MessageBoxImage icon = MessageBoxImage.Warning;
-                MessageBoxResult result = System.Windows.MessageBox.Show(warnText, caption, buttons, icon);
-                switch (result)
+                ContentDialog dialog = new ContentDialog();
+
+                string warnText = Application.Current.Resources["WarnLoadConfigFailed"] as string;
+                string caption = Application.Current.Resources["CaptionConfigLoadError"] as string;
+
+                dialog.Title = caption;
+                dialog.Content = warnText;
+                dialog.PrimaryButtonText = Application.Current.Resources["OK"] as string;
+                dialog.CloseButtonText = Application.Current.Resources["Cancel"] as string;
+                dialog.IsSecondaryButtonEnabled = false;
+                dialog.DefaultButton = ContentDialogButton.Primary;
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
                 {
-                    case MessageBoxResult.OK:
-                        ListConfigs = new ObservableCollection<Config>();
-                        break;
-                    case MessageBoxResult.Cancel:
-                        System.Windows.Application.Current.Shutdown();
-                        break;
+                    ListConfigs = new ObservableCollection<Config>();
+                }
+                else
+                {
+                    Application.Current.Exit();
                 }
             }
         }

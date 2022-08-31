@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DLOrganizer (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "DLOrganizer (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

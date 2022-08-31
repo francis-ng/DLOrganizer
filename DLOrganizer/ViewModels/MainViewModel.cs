@@ -1,13 +1,15 @@
 ﻿using DLOrganizer.Commands;
 using DLOrganizer.ConfigProvider;
 using DLOrganizer.Model;
-using DLOrganizer.Properties;
+using DLOrganizer.Utils;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Input;
+using Windows.Storage.Pickers;
 
 namespace DLOrganizer.ViewModels
 {
@@ -20,6 +22,7 @@ namespace DLOrganizer.ViewModels
         private ActionCommand<bool> clearLogCommand;
         private string sourceFolder, logContents;
         private int totalFiles, filesCompleted;
+        private DispatcherQueue dispatcher;
 
         #region Properties
         public string SourceFolder
@@ -31,6 +34,7 @@ namespace DLOrganizer.ViewModels
             set
             {
                 sourceFolder = value;
+                SettingsManager.Settings.DefaultSource = value;
                 NotifyPropertyChanged(nameof(SourceFolder));
             }
         }
@@ -130,13 +134,14 @@ namespace DLOrganizer.ViewModels
 
         public MainViewModel()
         {
-            SourceFolder = Settings.Default.DefaultSource;
+            SourceFolder = SettingsManager.Settings.DefaultSource;
             SanitizeTypes = new ObservableCollection<SanitizeType>();
             SanitizeTypes.Add(new SanitizeType(@"Don't standardize filenames", 0));
-            SanitizeTypes.Add(new SanitizeType(@"Change '_' to ' '", 0));
-            SanitizeTypes.Add(new SanitizeType(@"Change ' ' to '_'", 0));
+            SanitizeTypes.Add(new SanitizeType(@"Change '_' to ' '", 1));
+            SanitizeTypes.Add(new SanitizeType(@"Change ' ' to '_'", 2));
             TotalFiles = 0;
             FilesCompleted = 0;
+            dispatcher = DispatcherQueue.GetForCurrentThread();
         }
 
         private void NotifyPropertyChanged(string propertyName)
@@ -162,22 +167,19 @@ namespace DLOrganizer.ViewModels
             }
         }
 
-        private void Browse(bool dummy)
+        private async void Browse(bool dummy)
         {
-            using (var fldrDialog = new FolderBrowserDialog()) {
-                fldrDialog.RootFolder = Environment.SpecialFolder.MyComputer;
-                if (string.IsNullOrWhiteSpace(SourceFolder))
-                {
-                    fldrDialog.SelectedPath = Settings.Default.DefaultSource;
-                }
-                else
-                {
-                    fldrDialog.SelectedPath = SourceFolder;
-                }
-                if (fldrDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fldrDialog.SelectedPath))
-                {
-                    SourceFolder = fldrDialog.SelectedPath;
-                }
+            var folderPicker = new FolderPicker();
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle((Application.Current as App).Window);
+            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+
+            folderPicker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+            folderPicker.FileTypeFilter.Add("*");
+            var folder = await folderPicker.PickSingleFolderAsync();
+            if (folder != null)
+            {
+                SourceFolder = folder.Path;
+                SettingsManager.Settings.DefaultSource = folder.Path;
             }
         }
 
@@ -195,11 +197,14 @@ namespace DLOrganizer.ViewModels
 
         private void LogUpdated(object sender, LogEvent e)
         {
-            if (e.Type == LogEvent.EventType.FileMove && e.Success)
+            dispatcher.TryEnqueue(() =>
             {
-                FilesCompleted = filesCompleted + 1;
-            }
-            AddToLog(e.LogMessage);
+                if (e.Type == LogEvent.EventType.FileMove && e.Success)
+                {
+                    FilesCompleted = filesCompleted + 1;
+                }
+                AddToLog(e.LogMessage);
+            });
         }
         #endregion
 

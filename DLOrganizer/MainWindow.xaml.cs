@@ -1,40 +1,19 @@
-﻿using DLOrganizer.Commands;
-using DLOrganizer.Model;
-using DLOrganizer.Properties;
-using DLOrganizer.ViewModels;
-using System.Collections.Generic;
-using System.Windows.Input;
+﻿using DLOrganizer.ConfigProvider;
+using DLOrganizer.Utils;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using System;
+
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace DLOrganizer
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public partial class MainWindow
+    public sealed partial class MainWindow : Window
     {
-        private const string VERSION = "v2.1.0";
-        private const string configFile = "config.json";
-
-        private MainViewModel mainViewModel;
-        private ConfigViewModel configViewModel;
-        private AboutViewModel aboutViewModel;
-
-        private ActionCommand<int> navCommand;
-
-        public List<NavButton> MainButtons { get; private set; }
-
-        public ICommand NavigateCommand
-        {
-            get
-            {
-                if (navCommand == null)
-                {
-                    navCommand = new ActionCommand<int>(ChangePage, CanNavigate);
-                }
-                return navCommand;
-            }
-        }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -43,50 +22,18 @@ namespace DLOrganizer
 
         private void Initialize()
         {
-            Closing += OnWindowClosing;
-
-            MainButtons = new List<NavButton>();
-            MainButtons.Add(new NavButton("Process", NavigateCommand, 0));
-            MainButtons.Add(new NavButton("Configuration", NavigateCommand, 1));
-            MainButtons.Add(new NavButton("About", NavigateCommand, 2));
-            MenuItems.ItemsSource = MainButtons;
-
-            navCommand = new ActionCommand<int>(ChangePage, CanNavigate);
-
-            mainViewModel = new MainViewModel();
-            configViewModel = new ConfigViewModel(configFile);
-            aboutViewModel = new AboutViewModel(VERSION);
-
-            ChangePage(0);
+            Title = Application.Current.Resources["AppTitle"] as string;
+            content.Navigate(Type.GetType("DLOrganizer.Views.MainView"));
+            ConfigManager.LoadConfigs(SettingsManager.Settings.ConfigFile);
         }
 
-        private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            configViewModel.SaveConfigs();
-            Settings.Default.DefaultSource = mainViewModel.SourceFolder;
-            Settings.Default.Save();
-        }
-
-        public void ChangePage(int page)
-        {
-            configViewModel.SaveConfigs();
-            switch (page)
-            {
-                case 0:
-                    DataContext = mainViewModel;
-                    break;
-                case 1:
-                    DataContext = configViewModel;
-                    break;
-                case 2:
-                    DataContext = aboutViewModel;
-                    break;
-            }
-        }
-
-        public static bool CanNavigate()
-        {
-            return true;
+            var selectedItem = (NavigationViewItem)args.SelectedItem;
+            string selectedItemTag = ((string)selectedItem.Tag);
+            string pageName = "DLOrganizer.Views." + selectedItemTag;
+            Type pageType = Type.GetType(pageName);
+            content.Navigate(pageType);
         }
     }
 }

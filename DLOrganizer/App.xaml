@@ -1,13 +1,30 @@
-﻿<Application x:Class="DLOrganizer.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml"
-             DispatcherUnhandledException="Application_DispatcherUnhandledException">
+﻿<Application
+    x:Class="DLOrganizer.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DLOrganizer">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/FluentWPF;component/Styles/Controls.xaml" />
-			</ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Other merged dictionaries here -->
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Other app resources here -->
+            <x:String x:Key="AppTitle">DLOrganizer</x:String>
+            <x:String x:Key="Version">3.0.0</x:String>
+            <x:String x:Key="MenuProcess">Process</x:String>
+            <x:String x:Key="MenuConfig">Configuration</x:String>
+            <x:String x:Key="MenuAbout">About</x:String>
+            <x:String x:Key="CaptionConfigLoadError">Configuration Load Error</x:String>
+            <x:String x:Key="CaptionConfigSaveError">Configuration Save Error</x:String>
+            <x:String x:Key="WarnLoadConfigFailed">Error reading configuration file. Click OK to start with a fresh file, or Cancel to exit.</x:String>
+            <x:String x:Key="WarnSaveConfigFailed">Error when saving configuration file. Your current configuration has not been saved. Click Yes to try again, or No to continue without saving.</x:String>
+            <x:String x:Key="Exception">Exception</x:String>
+            <x:String x:Key="Yes">Yes</x:String>
+            <x:String x:Key="No">No</x:String>
+            <x:String x:Key="OK">OK</x:String>
+            <x:String x:Key="Cancel">Cancel</x:String>
+            <!--<x:String x:Key=""></x:String>-->
         </ResourceDictionary>
     </Application.Resources>
 </Application>
